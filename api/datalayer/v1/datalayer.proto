@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package datalayer.v1;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/empty.proto";
+
+
+option go_package = "datahub/api/datalayer/v1;v1";
+
+// --- Service Definitions ---
+
+// DataCRUD provides CRUD operations and transaction management.
+service DataCRUD {
+  // Inserts one or more rows into a table.
+  rpc Insert(InsertRequest) returns (MutationResponse);
+}
+
+// --- Common Mutation Response ---
+message MutationResponse {
+  int64 affected_rows = 1; // Number of rows affected by Insert, Update, or Delete
+}
+
+// --- Core Data Types ---
+// Represents a single row of data as a map of column names to values.
+message Row {
+  map<string, google.protobuf.Value> fields = 1;
+}
+
+// Enum for handling conflicts during insertion (e.g., INSERT IGNORE).
+enum ConflictAction {
+  CONFLICT_ACTION_UNSPECIFIED = 0; // Default behavior (likely error)
+  FAIL = 1;           // Fail the operation if conflict occurs (Standard SQL behavior)
+  IGNORE = 2;         // Ignore the row causing conflict (MySQL INSERT IGNORE)
+  UPSERT = 3;         // Update the existing row if conflict occurs (ON DUPLICATE KEY UPDATE)
+}
+
+message TableSchema {
+  string db_name = 1;
+  string table_name = 2;
+}
+
+// --- Insert ---
+message InsertRequest {
+  TableSchema table = 1;                      // Target table name
+  repeated Row rows = 2;                 // Rows to insert (required)
+  ConflictAction on_conflict = 3;        // How to handle conflicts (e.g., IGNORE)
+  // Optional: Transaction ID if part of a transaction
+  string transaction_id = 4;
+}
