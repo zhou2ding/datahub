@@ -40,6 +40,97 @@ message TableSchema {
   string table_name = 2;
 }
 
+enum RedisDB {
+  UNSPECIFIED = 0;
+  PERMISSION = 1;
+  MQTT = 2;
+  SHADOW = 3;
+  MANAGEMENT = 4;
+  FILE = 5;
+  DEVICE_LOG = 6;
+}
+
+// Enum for comparison operators used in conditions.
+enum Operator {
+  OPERATOR_UNSPECIFIED = 0;
+  EQ = 1; // Equal (=)
+  NEQ = 2; // Not Equal (!= or <>)
+  GT = 3; // Greater Than (>)
+  GTE = 4; // Greater Than or Equal (>=)
+  LT = 5; // Less Than (<)
+  LTE = 6; // Less Than or Equal (<=)
+  IN = 7; // In List (IN (...))
+  NOT_IN = 8; // Not In List (NOT IN (...))
+  LIKE = 9; // Like (LIKE 'pattern')
+  NOT_LIKE = 10; // Not Like (NOT LIKE 'pattern')
+  IS_NULL = 11; // Is Null (IS NULL)
+  IS_NOT_NULL = 12; // Is Not Null (IS NOT NULL)
+  EXISTS = 13;    // EXISTS (subquery)
+  NOT_EXISTS = 14; // NOT EXISTS (subquery)
+}
+
+// Enum for logical operators combining conditions.
+enum LogicalOperator {
+  LOGICAL_OPERATOR_UNSPECIFIED = 0;
+  AND = 1;
+  OR = 2;
+}
+
+// Represents a complex WHERE clause, potentially nested.
+message WhereClause {
+  oneof clause_type {
+    Condition condition = 1;          // A single condition
+    NestedClause nested_clause = 2;   // A combination of clauses
+  }
+}
+
+// Represents a logical combination (AND/OR) of multiple WhereClauses.
+message NestedClause {
+  LogicalOperator logical_operator = 1; // AND or OR
+  repeated WhereClause clauses = 2;     // Clauses to combine
+}
+
+// --- Condition and Clause Structures ---
+
+// Represents a single condition (e.g., "age > 30", "status IN ('active', 'pending')").
+message Condition {
+  string field = 1;         // Field name for comparison. For EXISTS/NOT_EXISTS, this field might be ignored or not applicable.
+  Operator operator = 2;    // Comparison operator
+  oneof operand_type {
+    google.protobuf.Value literal_value = 3; // For literal values or lists of literal values.
+    QueryRequest subquery_value = 4;      // For subqueries. e.g., IN (SELECT ...), EXISTS (SELECT ...), or field = (SELECT ...)
+  }
+}
+
+// --- Request/Response Messages ---
+
+// --- Query ---
+message QueryRequest {
+  TableSchema table = 1;                      // Target table name
+  // Optional: If empty, implies SELECT * (or server default)
+  repeated string select_fields = 2;     // Specific fields to retrieve
+  // Optional: Filter conditions
+  WhereClause where_clause = 4;
+  // Optional: Having clause for filtering after grouping
+  WhereClause having_clause = 7;
+  // Optional: Pagination limit (number of rows)
+  int64 limit = 9;
+  // Optional: Pagination offset (starting row index)
+  int64 offset = 10;
+  // Optional: Transaction ID if part of a transaction
+  string transaction_id = 11;
+  // Optional: Set to true to request the total count matching the where clause (ignoring limit/offset).
+  bool request_total_count = 12;
+  // Optional: If set, indicates a desire to cache the query result based on a single equality condition
+  // on this field. The caching layer will validate if the where_clause matches this expectation.
+  string cache_by_field = 13;
+  // Optional: Specify cache TTL for this query, defaults to 24h if not set or invalid.
+  int64 cache_ttl_seconds = 14;
+  // Optional: Specifies the Redis database number to use for caching this query.
+  RedisDB redis_db = 15;
+}
+
+
 // --- Insert ---
 message InsertRequest {
   TableSchema table = 1;                      // Target table name
@@ -47,4 +138,17 @@ message InsertRequest {
   ConflictAction on_conflict = 3;        // How to handle conflicts (e.g., IGNORE)
   // Optional: Transaction ID if part of a transaction
   string transaction_id = 4;
+}
+
+// --- Update ---
+message UpdateRequest {
+  TableSchema table = 1;                      // Target table name
+  Row data = 2;                          // Map of fields and new values to set (required)
+  WhereClause where_clause = 3;          // Conditions to match rows for update (required)
+  // Optional: Transaction ID if part of a transaction
+  string transaction_id = 4;
+  // Optional
+  string cache_by_field = 5;
+  // Optional
+  RedisDB redis_db = 6;
 }
