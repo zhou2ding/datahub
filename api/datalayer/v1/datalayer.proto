@@ -152,3 +152,15 @@ message UpdateRequest {
   // Optional
   RedisDB redis_db = 6;
 }
+
+// --- Delete ---
+message DeleteRequest {
+  TableSchema table = 1;                      // Target table name
+  WhereClause where_clause = 2;          // Conditions to match rows for deletion (required)
+  // Optional: Transaction ID if part of a transaction
+  string transaction_id = 3;
+  // Optional
+  string cache_by_field = 4;
+  // Optional
+  RedisDB redis_db = 5;
+}
