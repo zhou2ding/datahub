@@ -6,48 +6,37 @@ import "google/protobuf/struct.proto";
 import "google/protobuf/empty.proto";
 
 
-option go_package = "datahub/api/datalayer/v1;v1";
+option go_package = "datalayer/v1;v1";
 
 // --- Service Definitions ---
 
 // DataCRUD provides CRUD operations and transaction management.
 service DataCRUD {
+  // Queries data from a table.
+  rpc Query(QueryRequest) returns (QueryResponse);
+
   // Inserts one or more rows into a table.
   rpc Insert(InsertRequest) returns (MutationResponse);
-}
 
-// --- Common Mutation Response ---
-message MutationResponse {
-  int64 affected_rows = 1; // Number of rows affected by Insert, Update, or Delete
+  // Updates existing rows in a table based on conditions.
+  rpc Update(UpdateRequest) returns (MutationResponse);
+
+  // Deletes rows from a table based on conditions.
+  rpc Delete(DeleteRequest) returns (MutationResponse);
 }
 
 // --- Core Data Types ---
+
 // Represents a single row of data as a map of column names to values.
 message Row {
   map<string, google.protobuf.Value> fields = 1;
 }
 
-// Enum for handling conflicts during insertion (e.g., INSERT IGNORE).
-enum ConflictAction {
-  CONFLICT_ACTION_UNSPECIFIED = 0; // Default behavior (likely error)
-  FAIL = 1;           // Fail the operation if conflict occurs (Standard SQL behavior)
-  IGNORE = 2;         // Ignore the row causing conflict (MySQL INSERT IGNORE)
-  UPSERT = 3;         // Update the existing row if conflict occurs (ON DUPLICATE KEY UPDATE)
-}
-
-message TableSchema {
-  string db_name = 1;
-  string table_name = 2;
-}
-
-enum RedisDB {
-  UNSPECIFIED = 0;
-  PERMISSION = 1;
-  MQTT = 2;
-  SHADOW = 3;
-  MANAGEMENT = 4;
-  FILE = 5;
-  DEVICE_LOG = 6;
+// Enum for specifying sort order.
+enum SortDirection {
+  SORT_DIRECTION_UNSPECIFIED = 0;
+  ASC = 1; // Ascending
+  DESC = 2; // Descending
 }
 
 // Enum for comparison operators used in conditions.
@@ -76,18 +65,20 @@ enum LogicalOperator {
   OR = 2;
 }
 
-// Represents a complex WHERE clause, potentially nested.
-message WhereClause {
-  oneof clause_type {
-    Condition condition = 1;          // A single condition
-    NestedClause nested_clause = 2;   // A combination of clauses
-  }
+// Enum for handling conflicts during insertion (e.g., INSERT IGNORE).
+enum ConflictAction {
+  CONFLICT_ACTION_UNSPECIFIED = 0; // Default behavior (likely error)
+  FAIL = 1;           // Fail the operation if conflict occurs (Standard SQL behavior)
+  IGNORE = 2;         // Ignore the row causing conflict (MySQL INSERT IGNORE)
+  UPSERT = 3;         // Update the existing row if conflict occurs (ON DUPLICATE KEY UPDATE)
 }
 
-// Represents a logical combination (AND/OR) of multiple WhereClauses.
-message NestedClause {
-  LogicalOperator logical_operator = 1; // AND or OR
-  repeated WhereClause clauses = 2;     // Clauses to combine
+// Enum for Join types.
+enum JoinType {
+  JOIN_TYPE_UNSPECIFIED = 0;
+  INNER = 1;
+  LEFT = 2;
+  RIGHT = 3;
 }
 
 // --- Condition and Clause Structures ---
@@ -102,6 +93,81 @@ message Condition {
   }
 }
 
+// Represents a complex WHERE clause, potentially nested.
+message WhereClause {
+  oneof clause_type {
+    Condition condition = 1;          // A single condition
+    NestedClause nested_clause = 2;   // A combination of clauses
+  }
+}
+
+// Represents a logical combination (AND/OR) of multiple WhereClauses.
+message NestedClause {
+  LogicalOperator logical_operator = 1; // AND or OR
+  repeated WhereClause clauses = 2;     // Clauses to combine
+}
+
+// Specifies ordering for query results.
+message OrderBy {
+  string field = 1;                 // Column name to sort by
+  SortDirection direction = 2;      // ASC or DESC
+}
+
+// Specifies field comparisons in JOIN ON conditions
+message FieldComparison {
+  // Field name from the primary table in the query (or its alias).
+  string field_from_primary_table = 1;
+  // Comparison operator, usually EQ for joins.
+  Operator operator = 2;
+  // Field name from the table being joined (the target_table in Join message).
+  string field_from_joined_table = 3;
+}
+
+// Specifies a join between tables.
+message Join {
+  JoinType type = 1;                // Type of join (INNER, LEFT, etc.)
+  string target_table = 2;          // The table to join with
+  // Join conditions (e.g., "product.id = device.product_id")
+  // Conditions for the JOIN ON clause, comparing fields between the primary and joined tables.
+  repeated FieldComparison on_conditions = 3;
+}
+
+// Specifies aggregation functions.
+message Aggregation {
+  // Standard SQL aggregate functions
+  enum Function {
+    FUNCTION_UNSPECIFIED = 0;
+    COUNT = 1;
+    SUM = 2;
+    AVG = 3;
+    MIN = 4;
+    MAX = 5;
+  }
+  Function function = 1;
+  string field = 2;      // Field to aggregate (use "*" or specific field for COUNT)
+  string alias = 3;      // Alias for the result column (e.g., "total_users")
+}
+
+// Specifies grouping for aggregation queries.
+message GroupBy {
+  repeated string fields = 1; // List of fields to group by
+}
+
+message TableSchema {
+  string db_name = 1;
+  string table_name = 2;
+}
+
+enum RedisDB {
+  UNSPECIFIED = 0;
+  PERMISSION = 1;
+  MQTT = 2;
+  SHADOW = 3;
+  MANAGEMENT = 4;
+  FILE = 5;
+  DEVICE_LOG = 6;
+}
+
 // --- Request/Response Messages ---
 
 // --- Query ---
@@ -109,10 +175,18 @@ message QueryRequest {
   TableSchema table = 1;                      // Target table name
   // Optional: If empty, implies SELECT * (or server default)
   repeated string select_fields = 2;     // Specific fields to retrieve
+  // Optional: Aggregations to perform
+  repeated Aggregation aggregations = 3;
   // Optional: Filter conditions
   WhereClause where_clause = 4;
+  // Optional: Joins with other tables
+  repeated Join joins = 5;
+  // Optional: Grouping for aggregations
+  GroupBy group_by = 6;
   // Optional: Having clause for filtering after grouping
   WhereClause having_clause = 7;
+  // Optional: Sorting
+  repeated OrderBy order_by = 8;
   // Optional: Pagination limit (number of rows)
   int64 limit = 9;
   // Optional: Pagination offset (starting row index)
@@ -130,6 +204,12 @@ message QueryRequest {
   RedisDB redis_db = 15;
 }
 
+message QueryResponse {
+  repeated Row rows = 1; // The resulting data rows
+  // Optional: Total number of rows matching the query criteria, ignoring pagination (limit/offset).
+  // This is populated only if requested in QueryRequest.
+  int64 total_count = 2;
+}
 
 // --- Insert ---
 message InsertRequest {
@@ -163,4 +243,9 @@ message DeleteRequest {
   string cache_by_field = 4;
   // Optional
   RedisDB redis_db = 5;
+}
+
+// --- Common Mutation Response ---
+message MutationResponse {
+  int64 affected_rows = 1; // Number of rows affected by Insert, Update, or Delete
 }
