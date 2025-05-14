@@ -23,6 +23,22 @@ service DataCRUD {
 
   // Deletes rows from a table based on conditions.
   rpc Delete(DeleteRequest) returns (MutationResponse);
+
+  // --- Transaction Control ---
+  // Begins a new transaction.
+  rpc BeginTransaction(BeginTransactionRequest) returns (BeginTransactionResponse);
+  // Commits an existing transaction.
+  rpc CommitTransaction(TransactionRequest) returns (google.protobuf.Empty);
+  // Rolls back an existing transaction.
+  rpc RollbackTransaction(TransactionRequest) returns (google.protobuf.Empty);
+}
+
+// Metadata provides operations to inspect database schema.
+service Metadata {
+  // Lists available tables.
+  rpc ListTables(ListTablesRequest) returns (ListTablesResponse);
+  // Describes the structure (columns, types, etc.) of a specific table.
+  rpc DescribeTable(DescribeTableRequest) returns (DescribeTableResponse);
 }
 
 // --- Core Data Types ---
@@ -248,4 +264,54 @@ message DeleteRequest {
 // --- Common Mutation Response ---
 message MutationResponse {
   int64 affected_rows = 1; // Number of rows affected by Insert, Update, or Delete
+}
+
+// --- Transaction ---
+message BeginTransactionRequest {
+  string db_name = 1;
+}
+
+message BeginTransactionResponse {
+  string transaction_id = 1; // ID to use in subsequent requests within this transaction
+}
+
+message TransactionRequest {
+  string transaction_id = 1; // The ID of the transaction to commit or rollback (required)
+}
+
+// --- Metadata ---
+message ListTablesRequest {
+  // Optional: filter by schema name if applicable
+  string db_name = 1;
+}
+
+message ListTablesResponse {
+  repeated string table_names = 1;
+}
+
+message DescribeTableRequest {
+  TableSchema table = 1; // Required
+}
+
+message ColumnMetadata {
+  string name = 1;             // Column name
+  string data_type = 2;        // Database-specific type (e.g., "VARCHAR(255)", "INT", "TIMESTAMP")
+  bool is_nullable = 3;        // Can the column contain NULL?
+  string default_value = 4;    // Default value as string (might be null)
+  bool is_primary_key = 5;   // Is this column part of the primary key?
+  int64 max_length = 6; // For string types
+}
+
+message IndexMetadata {
+  string name = 1;             // Index name (e.g., "PRIMARY", "idx_user_email")
+  repeated string columns = 2; // List of column names included in the index, in order.
+  bool is_unique = 3;        // True if this is a unique index.
+  // Optional: Index type (e.g., "BTREE", "HASH", "FULLTEXT"). Might be DB specific.
+  string index_type = 4;
+}
+
+message DescribeTableResponse {
+  string table_name = 1;
+  repeated ColumnMetadata columns = 2;
+  repeated IndexMetadata indices = 3;
 }
