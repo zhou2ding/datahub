@@ -1,3 +1,10 @@
+log:
+  level: debug
+  path: ./logs
+  size: 10
+  expire: 3
+  limit: 15
+  stdout: true
 server:
   http:
     addr: 0.0.0.0:8000
@@ -7,9 +14,12 @@ server:
     timeout: 1s
 data:
   database:
-    driver: mysql
-    source: root:root@tcp(127.0.0.1:3306)/test?parseTime=True&loc=Local
+    - name: mysql
+      source: root:root@tcp(127.0.0.1:3306)/test?parseTime=True&loc=Local
   redis:
-    addr: 127.0.0.1:6379
-    read_timeout: 0.2s
-    write_timeout: 0.2s
+    master: "aoni-master"
+    password: "eptest$00"
+    sentinelAddrs:
+      - "aoni-redis:26379"
+      - "aoni-redis:26479"
+      - "aoni-redis:26579"
