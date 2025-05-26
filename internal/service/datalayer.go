@@ -1,9 +1,9 @@
 package service
 
 import (
-	"CMAIOT2/apps/datahub/internal/biz"
-	"CMAIOT2/pb/datalayer/v1"
 	"context"
+	"datahub/api/datalayer/v1"
+	"datahub/internal/biz"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
