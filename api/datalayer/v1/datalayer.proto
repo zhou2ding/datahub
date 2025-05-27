@@ -41,6 +41,11 @@ service Metadata {
   rpc DescribeTable(DescribeTableRequest) returns (DescribeTableResponse);
 }
 
+service RawSql {
+  // Executes raw SQL
+  rpc ExecRawSQL(ExecRawSQLRequest) returns (ExecRawSQLResponse);
+}
+
 // --- Core Data Types ---
 
 // Represents a single row of data as a map of column names to values.
@@ -314,4 +319,15 @@ message DescribeTableResponse {
   string table_name = 1;
   repeated ColumnMetadata columns = 2;
   repeated IndexMetadata indices = 3;
+}
+
+message ExecRawSQLRequest {
+  string db = 1;
+  string sql = 2;
+  string transaction_id = 3;
+}
+
+message ExecRawSQLResponse {
+  int64 affected_rows = 1;
+  repeated Row rows = 2;
 }

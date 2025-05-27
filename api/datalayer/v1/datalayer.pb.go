@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v5.29.3
-// source: api/datalayer/v1/datalayer.proto
+// source: datalayer.proto
 
 package v1
 
@@ -57,11 +57,11 @@ func (x SortDirection) String() string {
 }
 
 func (SortDirection) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_datalayer_v1_datalayer_proto_enumTypes[0].Descriptor()
+	return file_datalayer_proto_enumTypes[0].Descriptor()
 }
 
 func (SortDirection) Type() protoreflect.EnumType {
-	return &file_api_datalayer_v1_datalayer_proto_enumTypes[0]
+	return &file_datalayer_proto_enumTypes[0]
 }
 
 func (x SortDirection) Number() protoreflect.EnumNumber {
@@ -70,7 +70,7 @@ func (x SortDirection) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SortDirection.Descriptor instead.
 func (SortDirection) EnumDescriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{0}
+	return file_datalayer_proto_rawDescGZIP(), []int{0}
 }
 
 // Enum for comparison operators used in conditions.
@@ -143,11 +143,11 @@ func (x Operator) String() string {
 }
 
 func (Operator) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_datalayer_v1_datalayer_proto_enumTypes[1].Descriptor()
+	return file_datalayer_proto_enumTypes[1].Descriptor()
 }
 
 func (Operator) Type() protoreflect.EnumType {
-	return &file_api_datalayer_v1_datalayer_proto_enumTypes[1]
+	return &file_datalayer_proto_enumTypes[1]
 }
 
 func (x Operator) Number() protoreflect.EnumNumber {
@@ -156,7 +156,7 @@ func (x Operator) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Operator.Descriptor instead.
 func (Operator) EnumDescriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{1}
+	return file_datalayer_proto_rawDescGZIP(), []int{1}
 }
 
 // Enum for logical operators combining conditions.
@@ -193,11 +193,11 @@ func (x LogicalOperator) String() string {
 }
 
 func (LogicalOperator) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_datalayer_v1_datalayer_proto_enumTypes[2].Descriptor()
+	return file_datalayer_proto_enumTypes[2].Descriptor()
 }
 
 func (LogicalOperator) Type() protoreflect.EnumType {
-	return &file_api_datalayer_v1_datalayer_proto_enumTypes[2]
+	return &file_datalayer_proto_enumTypes[2]
 }
 
 func (x LogicalOperator) Number() protoreflect.EnumNumber {
@@ -206,7 +206,7 @@ func (x LogicalOperator) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use LogicalOperator.Descriptor instead.
 func (LogicalOperator) EnumDescriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{2}
+	return file_datalayer_proto_rawDescGZIP(), []int{2}
 }
 
 // Enum for handling conflicts during insertion (e.g., INSERT IGNORE).
@@ -246,11 +246,11 @@ func (x ConflictAction) String() string {
 }
 
 func (ConflictAction) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_datalayer_v1_datalayer_proto_enumTypes[3].Descriptor()
+	return file_datalayer_proto_enumTypes[3].Descriptor()
 }
 
 func (ConflictAction) Type() protoreflect.EnumType {
-	return &file_api_datalayer_v1_datalayer_proto_enumTypes[3]
+	return &file_datalayer_proto_enumTypes[3]
 }
 
 func (x ConflictAction) Number() protoreflect.EnumNumber {
@@ -259,7 +259,7 @@ func (x ConflictAction) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ConflictAction.Descriptor instead.
 func (ConflictAction) EnumDescriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{3}
+	return file_datalayer_proto_rawDescGZIP(), []int{3}
 }
 
 // Enum for Join types.
@@ -299,11 +299,11 @@ func (x JoinType) String() string {
 }
 
 func (JoinType) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_datalayer_v1_datalayer_proto_enumTypes[4].Descriptor()
+	return file_datalayer_proto_enumTypes[4].Descriptor()
 }
 
 func (JoinType) Type() protoreflect.EnumType {
-	return &file_api_datalayer_v1_datalayer_proto_enumTypes[4]
+	return &file_datalayer_proto_enumTypes[4]
 }
 
 func (x JoinType) Number() protoreflect.EnumNumber {
@@ -312,7 +312,7 @@ func (x JoinType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use JoinType.Descriptor instead.
 func (JoinType) EnumDescriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{4}
+	return file_datalayer_proto_rawDescGZIP(), []int{4}
 }
 
 type RedisDB int32
@@ -360,11 +360,11 @@ func (x RedisDB) String() string {
 }
 
 func (RedisDB) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_datalayer_v1_datalayer_proto_enumTypes[5].Descriptor()
+	return file_datalayer_proto_enumTypes[5].Descriptor()
 }
 
 func (RedisDB) Type() protoreflect.EnumType {
-	return &file_api_datalayer_v1_datalayer_proto_enumTypes[5]
+	return &file_datalayer_proto_enumTypes[5]
 }
 
 func (x RedisDB) Number() protoreflect.EnumNumber {
@@ -373,7 +373,7 @@ func (x RedisDB) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use RedisDB.Descriptor instead.
 func (RedisDB) EnumDescriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{5}
+	return file_datalayer_proto_rawDescGZIP(), []int{5}
 }
 
 // Standard SQL aggregate functions
@@ -419,11 +419,11 @@ func (x Aggregation_Function) String() string {
 }
 
 func (Aggregation_Function) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_datalayer_v1_datalayer_proto_enumTypes[6].Descriptor()
+	return file_datalayer_proto_enumTypes[6].Descriptor()
 }
 
 func (Aggregation_Function) Type() protoreflect.EnumType {
-	return &file_api_datalayer_v1_datalayer_proto_enumTypes[6]
+	return &file_datalayer_proto_enumTypes[6]
 }
 
 func (x Aggregation_Function) Number() protoreflect.EnumNumber {
@@ -432,7 +432,7 @@ func (x Aggregation_Function) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Aggregation_Function.Descriptor instead.
 func (Aggregation_Function) EnumDescriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{7, 0}
+	return file_datalayer_proto_rawDescGZIP(), []int{7, 0}
 }
 
 // Represents a single row of data as a map of column names to values.
@@ -445,7 +445,7 @@ type Row struct {
 
 func (x *Row) Reset() {
 	*x = Row{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[0]
+	mi := &file_datalayer_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -457,7 +457,7 @@ func (x *Row) String() string {
 func (*Row) ProtoMessage() {}
 
 func (x *Row) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[0]
+	mi := &file_datalayer_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -470,7 +470,7 @@ func (x *Row) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Row.ProtoReflect.Descriptor instead.
 func (*Row) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{0}
+	return file_datalayer_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Row) GetFields() map[string]*structpb.Value {
@@ -496,7 +496,7 @@ type Condition struct {
 
 func (x *Condition) Reset() {
 	*x = Condition{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[1]
+	mi := &file_datalayer_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -508,7 +508,7 @@ func (x *Condition) String() string {
 func (*Condition) ProtoMessage() {}
 
 func (x *Condition) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[1]
+	mi := &file_datalayer_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -521,7 +521,7 @@ func (x *Condition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Condition.ProtoReflect.Descriptor instead.
 func (*Condition) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{1}
+	return file_datalayer_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Condition) GetField() string {
@@ -593,7 +593,7 @@ type WhereClause struct {
 
 func (x *WhereClause) Reset() {
 	*x = WhereClause{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[2]
+	mi := &file_datalayer_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -605,7 +605,7 @@ func (x *WhereClause) String() string {
 func (*WhereClause) ProtoMessage() {}
 
 func (x *WhereClause) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[2]
+	mi := &file_datalayer_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -618,7 +618,7 @@ func (x *WhereClause) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WhereClause.ProtoReflect.Descriptor instead.
 func (*WhereClause) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{2}
+	return file_datalayer_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *WhereClause) GetClauseType() isWhereClause_ClauseType {
@@ -673,7 +673,7 @@ type NestedClause struct {
 
 func (x *NestedClause) Reset() {
 	*x = NestedClause{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[3]
+	mi := &file_datalayer_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -685,7 +685,7 @@ func (x *NestedClause) String() string {
 func (*NestedClause) ProtoMessage() {}
 
 func (x *NestedClause) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[3]
+	mi := &file_datalayer_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -698,7 +698,7 @@ func (x *NestedClause) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NestedClause.ProtoReflect.Descriptor instead.
 func (*NestedClause) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{3}
+	return file_datalayer_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *NestedClause) GetLogicalOperator() LogicalOperator {
@@ -726,7 +726,7 @@ type OrderBy struct {
 
 func (x *OrderBy) Reset() {
 	*x = OrderBy{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[4]
+	mi := &file_datalayer_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -738,7 +738,7 @@ func (x *OrderBy) String() string {
 func (*OrderBy) ProtoMessage() {}
 
 func (x *OrderBy) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[4]
+	mi := &file_datalayer_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -751,7 +751,7 @@ func (x *OrderBy) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OrderBy.ProtoReflect.Descriptor instead.
 func (*OrderBy) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{4}
+	return file_datalayer_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *OrderBy) GetField() string {
@@ -783,7 +783,7 @@ type FieldComparison struct {
 
 func (x *FieldComparison) Reset() {
 	*x = FieldComparison{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[5]
+	mi := &file_datalayer_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -795,7 +795,7 @@ func (x *FieldComparison) String() string {
 func (*FieldComparison) ProtoMessage() {}
 
 func (x *FieldComparison) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[5]
+	mi := &file_datalayer_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -808,7 +808,7 @@ func (x *FieldComparison) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FieldComparison.ProtoReflect.Descriptor instead.
 func (*FieldComparison) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{5}
+	return file_datalayer_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *FieldComparison) GetFieldFromPrimaryTable() string {
@@ -846,7 +846,7 @@ type Join struct {
 
 func (x *Join) Reset() {
 	*x = Join{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[6]
+	mi := &file_datalayer_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -858,7 +858,7 @@ func (x *Join) String() string {
 func (*Join) ProtoMessage() {}
 
 func (x *Join) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[6]
+	mi := &file_datalayer_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -871,7 +871,7 @@ func (x *Join) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Join.ProtoReflect.Descriptor instead.
 func (*Join) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{6}
+	return file_datalayer_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *Join) GetType() JoinType {
@@ -907,7 +907,7 @@ type Aggregation struct {
 
 func (x *Aggregation) Reset() {
 	*x = Aggregation{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[7]
+	mi := &file_datalayer_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -919,7 +919,7 @@ func (x *Aggregation) String() string {
 func (*Aggregation) ProtoMessage() {}
 
 func (x *Aggregation) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[7]
+	mi := &file_datalayer_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -932,7 +932,7 @@ func (x *Aggregation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Aggregation.ProtoReflect.Descriptor instead.
 func (*Aggregation) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{7}
+	return file_datalayer_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Aggregation) GetFunction() Aggregation_Function {
@@ -966,7 +966,7 @@ type GroupBy struct {
 
 func (x *GroupBy) Reset() {
 	*x = GroupBy{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[8]
+	mi := &file_datalayer_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -978,7 +978,7 @@ func (x *GroupBy) String() string {
 func (*GroupBy) ProtoMessage() {}
 
 func (x *GroupBy) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[8]
+	mi := &file_datalayer_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -991,7 +991,7 @@ func (x *GroupBy) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupBy.ProtoReflect.Descriptor instead.
 func (*GroupBy) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{8}
+	return file_datalayer_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GroupBy) GetFields() []string {
@@ -1011,7 +1011,7 @@ type TableSchema struct {
 
 func (x *TableSchema) Reset() {
 	*x = TableSchema{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[9]
+	mi := &file_datalayer_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1023,7 +1023,7 @@ func (x *TableSchema) String() string {
 func (*TableSchema) ProtoMessage() {}
 
 func (x *TableSchema) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[9]
+	mi := &file_datalayer_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1036,7 +1036,7 @@ func (x *TableSchema) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TableSchema.ProtoReflect.Descriptor instead.
 func (*TableSchema) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{9}
+	return file_datalayer_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *TableSchema) GetDbName() string {
@@ -1092,7 +1092,7 @@ type QueryRequest struct {
 
 func (x *QueryRequest) Reset() {
 	*x = QueryRequest{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[10]
+	mi := &file_datalayer_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1104,7 +1104,7 @@ func (x *QueryRequest) String() string {
 func (*QueryRequest) ProtoMessage() {}
 
 func (x *QueryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[10]
+	mi := &file_datalayer_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1117,7 +1117,7 @@ func (x *QueryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QueryRequest.ProtoReflect.Descriptor instead.
 func (*QueryRequest) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{10}
+	return file_datalayer_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *QueryRequest) GetTable() *TableSchema {
@@ -1237,7 +1237,7 @@ type QueryResponse struct {
 
 func (x *QueryResponse) Reset() {
 	*x = QueryResponse{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[11]
+	mi := &file_datalayer_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1249,7 +1249,7 @@ func (x *QueryResponse) String() string {
 func (*QueryResponse) ProtoMessage() {}
 
 func (x *QueryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[11]
+	mi := &file_datalayer_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1262,7 +1262,7 @@ func (x *QueryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QueryResponse.ProtoReflect.Descriptor instead.
 func (*QueryResponse) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{11}
+	return file_datalayer_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *QueryResponse) GetRows() []*Row {
@@ -1293,7 +1293,7 @@ type InsertRequest struct {
 
 func (x *InsertRequest) Reset() {
 	*x = InsertRequest{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[12]
+	mi := &file_datalayer_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1305,7 +1305,7 @@ func (x *InsertRequest) String() string {
 func (*InsertRequest) ProtoMessage() {}
 
 func (x *InsertRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[12]
+	mi := &file_datalayer_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1318,7 +1318,7 @@ func (x *InsertRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InsertRequest.ProtoReflect.Descriptor instead.
 func (*InsertRequest) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{12}
+	return file_datalayer_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *InsertRequest) GetTable() *TableSchema {
@@ -1367,7 +1367,7 @@ type UpdateRequest struct {
 
 func (x *UpdateRequest) Reset() {
 	*x = UpdateRequest{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[13]
+	mi := &file_datalayer_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1379,7 +1379,7 @@ func (x *UpdateRequest) String() string {
 func (*UpdateRequest) ProtoMessage() {}
 
 func (x *UpdateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[13]
+	mi := &file_datalayer_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1392,7 +1392,7 @@ func (x *UpdateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRequest.ProtoReflect.Descriptor instead.
 func (*UpdateRequest) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{13}
+	return file_datalayer_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *UpdateRequest) GetTable() *TableSchema {
@@ -1454,7 +1454,7 @@ type DeleteRequest struct {
 
 func (x *DeleteRequest) Reset() {
 	*x = DeleteRequest{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[14]
+	mi := &file_datalayer_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1466,7 +1466,7 @@ func (x *DeleteRequest) String() string {
 func (*DeleteRequest) ProtoMessage() {}
 
 func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[14]
+	mi := &file_datalayer_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1479,7 +1479,7 @@ func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteRequest.ProtoReflect.Descriptor instead.
 func (*DeleteRequest) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{14}
+	return file_datalayer_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *DeleteRequest) GetTable() *TableSchema {
@@ -1527,7 +1527,7 @@ type MutationResponse struct {
 
 func (x *MutationResponse) Reset() {
 	*x = MutationResponse{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[15]
+	mi := &file_datalayer_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1539,7 +1539,7 @@ func (x *MutationResponse) String() string {
 func (*MutationResponse) ProtoMessage() {}
 
 func (x *MutationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[15]
+	mi := &file_datalayer_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1552,7 +1552,7 @@ func (x *MutationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MutationResponse.ProtoReflect.Descriptor instead.
 func (*MutationResponse) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{15}
+	return file_datalayer_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *MutationResponse) GetAffectedRows() int64 {
@@ -1572,7 +1572,7 @@ type BeginTransactionRequest struct {
 
 func (x *BeginTransactionRequest) Reset() {
 	*x = BeginTransactionRequest{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[16]
+	mi := &file_datalayer_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1584,7 +1584,7 @@ func (x *BeginTransactionRequest) String() string {
 func (*BeginTransactionRequest) ProtoMessage() {}
 
 func (x *BeginTransactionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[16]
+	mi := &file_datalayer_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1597,7 +1597,7 @@ func (x *BeginTransactionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BeginTransactionRequest.ProtoReflect.Descriptor instead.
 func (*BeginTransactionRequest) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{16}
+	return file_datalayer_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *BeginTransactionRequest) GetDbName() string {
@@ -1616,7 +1616,7 @@ type BeginTransactionResponse struct {
 
 func (x *BeginTransactionResponse) Reset() {
 	*x = BeginTransactionResponse{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[17]
+	mi := &file_datalayer_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1628,7 +1628,7 @@ func (x *BeginTransactionResponse) String() string {
 func (*BeginTransactionResponse) ProtoMessage() {}
 
 func (x *BeginTransactionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[17]
+	mi := &file_datalayer_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1641,7 +1641,7 @@ func (x *BeginTransactionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BeginTransactionResponse.ProtoReflect.Descriptor instead.
 func (*BeginTransactionResponse) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{17}
+	return file_datalayer_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *BeginTransactionResponse) GetTransactionId() string {
@@ -1660,7 +1660,7 @@ type TransactionRequest struct {
 
 func (x *TransactionRequest) Reset() {
 	*x = TransactionRequest{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[18]
+	mi := &file_datalayer_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1672,7 +1672,7 @@ func (x *TransactionRequest) String() string {
 func (*TransactionRequest) ProtoMessage() {}
 
 func (x *TransactionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[18]
+	mi := &file_datalayer_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1685,7 +1685,7 @@ func (x *TransactionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransactionRequest.ProtoReflect.Descriptor instead.
 func (*TransactionRequest) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{18}
+	return file_datalayer_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *TransactionRequest) GetTransactionId() string {
@@ -1706,7 +1706,7 @@ type ListTablesRequest struct {
 
 func (x *ListTablesRequest) Reset() {
 	*x = ListTablesRequest{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[19]
+	mi := &file_datalayer_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1718,7 +1718,7 @@ func (x *ListTablesRequest) String() string {
 func (*ListTablesRequest) ProtoMessage() {}
 
 func (x *ListTablesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[19]
+	mi := &file_datalayer_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1731,7 +1731,7 @@ func (x *ListTablesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTablesRequest.ProtoReflect.Descriptor instead.
 func (*ListTablesRequest) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{19}
+	return file_datalayer_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ListTablesRequest) GetDbName() string {
@@ -1750,7 +1750,7 @@ type ListTablesResponse struct {
 
 func (x *ListTablesResponse) Reset() {
 	*x = ListTablesResponse{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[20]
+	mi := &file_datalayer_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1762,7 +1762,7 @@ func (x *ListTablesResponse) String() string {
 func (*ListTablesResponse) ProtoMessage() {}
 
 func (x *ListTablesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[20]
+	mi := &file_datalayer_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1775,7 +1775,7 @@ func (x *ListTablesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTablesResponse.ProtoReflect.Descriptor instead.
 func (*ListTablesResponse) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{20}
+	return file_datalayer_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ListTablesResponse) GetTableNames() []string {
@@ -1794,7 +1794,7 @@ type DescribeTableRequest struct {
 
 func (x *DescribeTableRequest) Reset() {
 	*x = DescribeTableRequest{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[21]
+	mi := &file_datalayer_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1806,7 +1806,7 @@ func (x *DescribeTableRequest) String() string {
 func (*DescribeTableRequest) ProtoMessage() {}
 
 func (x *DescribeTableRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[21]
+	mi := &file_datalayer_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1819,7 +1819,7 @@ func (x *DescribeTableRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DescribeTableRequest.ProtoReflect.Descriptor instead.
 func (*DescribeTableRequest) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{21}
+	return file_datalayer_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *DescribeTableRequest) GetTable() *TableSchema {
@@ -1843,7 +1843,7 @@ type ColumnMetadata struct {
 
 func (x *ColumnMetadata) Reset() {
 	*x = ColumnMetadata{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[22]
+	mi := &file_datalayer_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1855,7 +1855,7 @@ func (x *ColumnMetadata) String() string {
 func (*ColumnMetadata) ProtoMessage() {}
 
 func (x *ColumnMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[22]
+	mi := &file_datalayer_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1868,7 +1868,7 @@ func (x *ColumnMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ColumnMetadata.ProtoReflect.Descriptor instead.
 func (*ColumnMetadata) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{22}
+	return file_datalayer_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *ColumnMetadata) GetName() string {
@@ -1926,7 +1926,7 @@ type IndexMetadata struct {
 
 func (x *IndexMetadata) Reset() {
 	*x = IndexMetadata{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[23]
+	mi := &file_datalayer_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1938,7 +1938,7 @@ func (x *IndexMetadata) String() string {
 func (*IndexMetadata) ProtoMessage() {}
 
 func (x *IndexMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[23]
+	mi := &file_datalayer_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1951,7 +1951,7 @@ func (x *IndexMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IndexMetadata.ProtoReflect.Descriptor instead.
 func (*IndexMetadata) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{23}
+	return file_datalayer_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *IndexMetadata) GetName() string {
@@ -1993,7 +1993,7 @@ type DescribeTableResponse struct {
 
 func (x *DescribeTableResponse) Reset() {
 	*x = DescribeTableResponse{}
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[24]
+	mi := &file_datalayer_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2005,7 +2005,7 @@ func (x *DescribeTableResponse) String() string {
 func (*DescribeTableResponse) ProtoMessage() {}
 
 func (x *DescribeTableResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_datalayer_v1_datalayer_proto_msgTypes[24]
+	mi := &file_datalayer_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2018,7 +2018,7 @@ func (x *DescribeTableResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DescribeTableResponse.ProtoReflect.Descriptor instead.
 func (*DescribeTableResponse) Descriptor() ([]byte, []int) {
-	return file_api_datalayer_v1_datalayer_proto_rawDescGZIP(), []int{24}
+	return file_datalayer_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *DescribeTableResponse) GetTableName() string {
@@ -2042,11 +2042,123 @@ func (x *DescribeTableResponse) GetIndices() []*IndexMetadata {
 	return nil
 }
 
-var File_api_datalayer_v1_datalayer_proto protoreflect.FileDescriptor
+type ExecRawSQLRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Db            string                 `protobuf:"bytes,1,opt,name=db,proto3" json:"db,omitempty"`
+	Sql           string                 `protobuf:"bytes,2,opt,name=sql,proto3" json:"sql,omitempty"`
+	TransactionId string                 `protobuf:"bytes,3,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
 
-const file_api_datalayer_v1_datalayer_proto_rawDesc = "" +
+func (x *ExecRawSQLRequest) Reset() {
+	*x = ExecRawSQLRequest{}
+	mi := &file_datalayer_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExecRawSQLRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExecRawSQLRequest) ProtoMessage() {}
+
+func (x *ExecRawSQLRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_datalayer_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExecRawSQLRequest.ProtoReflect.Descriptor instead.
+func (*ExecRawSQLRequest) Descriptor() ([]byte, []int) {
+	return file_datalayer_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *ExecRawSQLRequest) GetDb() string {
+	if x != nil {
+		return x.Db
+	}
+	return ""
+}
+
+func (x *ExecRawSQLRequest) GetSql() string {
+	if x != nil {
+		return x.Sql
+	}
+	return ""
+}
+
+func (x *ExecRawSQLRequest) GetTransactionId() string {
+	if x != nil {
+		return x.TransactionId
+	}
+	return ""
+}
+
+type ExecRawSQLResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AffectedRows  int64                  `protobuf:"varint,1,opt,name=affected_rows,json=affectedRows,proto3" json:"affected_rows,omitempty"`
+	Rows          []*Row                 `protobuf:"bytes,2,rep,name=rows,proto3" json:"rows,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExecRawSQLResponse) Reset() {
+	*x = ExecRawSQLResponse{}
+	mi := &file_datalayer_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExecRawSQLResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExecRawSQLResponse) ProtoMessage() {}
+
+func (x *ExecRawSQLResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_datalayer_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExecRawSQLResponse.ProtoReflect.Descriptor instead.
+func (*ExecRawSQLResponse) Descriptor() ([]byte, []int) {
+	return file_datalayer_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *ExecRawSQLResponse) GetAffectedRows() int64 {
+	if x != nil {
+		return x.AffectedRows
+	}
+	return 0
+}
+
+func (x *ExecRawSQLResponse) GetRows() []*Row {
+	if x != nil {
+		return x.Rows
+	}
+	return nil
+}
+
+var File_datalayer_proto protoreflect.FileDescriptor
+
+const file_datalayer_proto_rawDesc = "" +
 	"\n" +
-	" api/datalayer/v1/datalayer.proto\x12\fdatalayer.v1\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1bgoogle/protobuf/empty.proto\"\x8f\x01\n" +
+	"\x0fdatalayer.proto\x12\fdatalayer.v1\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1bgoogle/protobuf/empty.proto\"\x8f\x01\n" +
 	"\x03Row\x125\n" +
 	"\x06fields\x18\x01 \x03(\v2\x1d.datalayer.v1.Row.FieldsEntryR\x06fields\x1aQ\n" +
 	"\vFieldsEntry\x12\x10\n" +
@@ -2167,7 +2279,14 @@ const file_api_datalayer_v1_datalayer_proto_rawDesc = "" +
 	"\n" +
 	"table_name\x18\x01 \x01(\tR\ttableName\x126\n" +
 	"\acolumns\x18\x02 \x03(\v2\x1c.datalayer.v1.ColumnMetadataR\acolumns\x125\n" +
-	"\aindices\x18\x03 \x03(\v2\x1b.datalayer.v1.IndexMetadataR\aindices*B\n" +
+	"\aindices\x18\x03 \x03(\v2\x1b.datalayer.v1.IndexMetadataR\aindices\"\\\n" +
+	"\x11ExecRawSQLRequest\x12\x0e\n" +
+	"\x02db\x18\x01 \x01(\tR\x02db\x12\x10\n" +
+	"\x03sql\x18\x02 \x01(\tR\x03sql\x12%\n" +
+	"\x0etransaction_id\x18\x03 \x01(\tR\rtransactionId\"`\n" +
+	"\x12ExecRawSQLResponse\x12#\n" +
+	"\raffected_rows\x18\x01 \x01(\x03R\faffectedRows\x12%\n" +
+	"\x04rows\x18\x02 \x03(\v2\x11.datalayer.v1.RowR\x04rows*B\n" +
 	"\rSortDirection\x12\x1e\n" +
 	"\x1aSORT_DIRECTION_UNSPECIFIED\x10\x00\x12\a\n" +
 	"\x03ASC\x10\x01\x12\b\n" +
@@ -2231,23 +2350,26 @@ const file_api_datalayer_v1_datalayer_proto_rawDesc = "" +
 	"\bMetadata\x12O\n" +
 	"\n" +
 	"ListTables\x12\x1f.datalayer.v1.ListTablesRequest\x1a .datalayer.v1.ListTablesResponse\x12X\n" +
-	"\rDescribeTable\x12\".datalayer.v1.DescribeTableRequest\x1a#.datalayer.v1.DescribeTableResponseB\x11Z\x0fdatalayer/v1;v1b\x06proto3"
+	"\rDescribeTable\x12\".datalayer.v1.DescribeTableRequest\x1a#.datalayer.v1.DescribeTableResponse2Y\n" +
+	"\x06RawSql\x12O\n" +
+	"\n" +
+	"ExecRawSQL\x12\x1f.datalayer.v1.ExecRawSQLRequest\x1a .datalayer.v1.ExecRawSQLResponseB\x11Z\x0fdatalayer/v1;v1b\x06proto3"
 
 var (
-	file_api_datalayer_v1_datalayer_proto_rawDescOnce sync.Once
-	file_api_datalayer_v1_datalayer_proto_rawDescData []byte
+	file_datalayer_proto_rawDescOnce sync.Once
+	file_datalayer_proto_rawDescData []byte
 )
 
-func file_api_datalayer_v1_datalayer_proto_rawDescGZIP() []byte {
-	file_api_datalayer_v1_datalayer_proto_rawDescOnce.Do(func() {
-		file_api_datalayer_v1_datalayer_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_datalayer_v1_datalayer_proto_rawDesc), len(file_api_datalayer_v1_datalayer_proto_rawDesc)))
+func file_datalayer_proto_rawDescGZIP() []byte {
+	file_datalayer_proto_rawDescOnce.Do(func() {
+		file_datalayer_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_datalayer_proto_rawDesc), len(file_datalayer_proto_rawDesc)))
 	})
-	return file_api_datalayer_v1_datalayer_proto_rawDescData
+	return file_datalayer_proto_rawDescData
 }
 
-var file_api_datalayer_v1_datalayer_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
-var file_api_datalayer_v1_datalayer_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
-var file_api_datalayer_v1_datalayer_proto_goTypes = []any{
+var file_datalayer_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
+var file_datalayer_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
+var file_datalayer_proto_goTypes = []any{
 	(SortDirection)(0),               // 0: datalayer.v1.SortDirection
 	(Operator)(0),                    // 1: datalayer.v1.Operator
 	(LogicalOperator)(0),             // 2: datalayer.v1.LogicalOperator
@@ -2280,14 +2402,16 @@ var file_api_datalayer_v1_datalayer_proto_goTypes = []any{
 	(*ColumnMetadata)(nil),           // 29: datalayer.v1.ColumnMetadata
 	(*IndexMetadata)(nil),            // 30: datalayer.v1.IndexMetadata
 	(*DescribeTableResponse)(nil),    // 31: datalayer.v1.DescribeTableResponse
-	nil,                              // 32: datalayer.v1.Row.FieldsEntry
-	(*structpb.Value)(nil),           // 33: google.protobuf.Value
-	(*emptypb.Empty)(nil),            // 34: google.protobuf.Empty
+	(*ExecRawSQLRequest)(nil),        // 32: datalayer.v1.ExecRawSQLRequest
+	(*ExecRawSQLResponse)(nil),       // 33: datalayer.v1.ExecRawSQLResponse
+	nil,                              // 34: datalayer.v1.Row.FieldsEntry
+	(*structpb.Value)(nil),           // 35: google.protobuf.Value
+	(*emptypb.Empty)(nil),            // 36: google.protobuf.Empty
 }
-var file_api_datalayer_v1_datalayer_proto_depIdxs = []int32{
-	32, // 0: datalayer.v1.Row.fields:type_name -> datalayer.v1.Row.FieldsEntry
+var file_datalayer_proto_depIdxs = []int32{
+	34, // 0: datalayer.v1.Row.fields:type_name -> datalayer.v1.Row.FieldsEntry
 	1,  // 1: datalayer.v1.Condition.operator:type_name -> datalayer.v1.Operator
-	33, // 2: datalayer.v1.Condition.literal_value:type_name -> google.protobuf.Value
+	35, // 2: datalayer.v1.Condition.literal_value:type_name -> google.protobuf.Value
 	17, // 3: datalayer.v1.Condition.subquery_value:type_name -> datalayer.v1.QueryRequest
 	8,  // 4: datalayer.v1.WhereClause.condition:type_name -> datalayer.v1.Condition
 	10, // 5: datalayer.v1.WhereClause.nested_clause:type_name -> datalayer.v1.NestedClause
@@ -2320,42 +2444,45 @@ var file_api_datalayer_v1_datalayer_proto_depIdxs = []int32{
 	16, // 32: datalayer.v1.DescribeTableRequest.table:type_name -> datalayer.v1.TableSchema
 	29, // 33: datalayer.v1.DescribeTableResponse.columns:type_name -> datalayer.v1.ColumnMetadata
 	30, // 34: datalayer.v1.DescribeTableResponse.indices:type_name -> datalayer.v1.IndexMetadata
-	33, // 35: datalayer.v1.Row.FieldsEntry.value:type_name -> google.protobuf.Value
-	17, // 36: datalayer.v1.DataCRUD.Query:input_type -> datalayer.v1.QueryRequest
-	19, // 37: datalayer.v1.DataCRUD.Insert:input_type -> datalayer.v1.InsertRequest
-	20, // 38: datalayer.v1.DataCRUD.Update:input_type -> datalayer.v1.UpdateRequest
-	21, // 39: datalayer.v1.DataCRUD.Delete:input_type -> datalayer.v1.DeleteRequest
-	23, // 40: datalayer.v1.DataCRUD.BeginTransaction:input_type -> datalayer.v1.BeginTransactionRequest
-	25, // 41: datalayer.v1.DataCRUD.CommitTransaction:input_type -> datalayer.v1.TransactionRequest
-	25, // 42: datalayer.v1.DataCRUD.RollbackTransaction:input_type -> datalayer.v1.TransactionRequest
-	26, // 43: datalayer.v1.Metadata.ListTables:input_type -> datalayer.v1.ListTablesRequest
-	28, // 44: datalayer.v1.Metadata.DescribeTable:input_type -> datalayer.v1.DescribeTableRequest
-	18, // 45: datalayer.v1.DataCRUD.Query:output_type -> datalayer.v1.QueryResponse
-	22, // 46: datalayer.v1.DataCRUD.Insert:output_type -> datalayer.v1.MutationResponse
-	22, // 47: datalayer.v1.DataCRUD.Update:output_type -> datalayer.v1.MutationResponse
-	22, // 48: datalayer.v1.DataCRUD.Delete:output_type -> datalayer.v1.MutationResponse
-	24, // 49: datalayer.v1.DataCRUD.BeginTransaction:output_type -> datalayer.v1.BeginTransactionResponse
-	34, // 50: datalayer.v1.DataCRUD.CommitTransaction:output_type -> google.protobuf.Empty
-	34, // 51: datalayer.v1.DataCRUD.RollbackTransaction:output_type -> google.protobuf.Empty
-	27, // 52: datalayer.v1.Metadata.ListTables:output_type -> datalayer.v1.ListTablesResponse
-	31, // 53: datalayer.v1.Metadata.DescribeTable:output_type -> datalayer.v1.DescribeTableResponse
-	45, // [45:54] is the sub-list for method output_type
-	36, // [36:45] is the sub-list for method input_type
-	36, // [36:36] is the sub-list for extension type_name
-	36, // [36:36] is the sub-list for extension extendee
-	0,  // [0:36] is the sub-list for field type_name
+	7,  // 35: datalayer.v1.ExecRawSQLResponse.rows:type_name -> datalayer.v1.Row
+	35, // 36: datalayer.v1.Row.FieldsEntry.value:type_name -> google.protobuf.Value
+	17, // 37: datalayer.v1.DataCRUD.Query:input_type -> datalayer.v1.QueryRequest
+	19, // 38: datalayer.v1.DataCRUD.Insert:input_type -> datalayer.v1.InsertRequest
+	20, // 39: datalayer.v1.DataCRUD.Update:input_type -> datalayer.v1.UpdateRequest
+	21, // 40: datalayer.v1.DataCRUD.Delete:input_type -> datalayer.v1.DeleteRequest
+	23, // 41: datalayer.v1.DataCRUD.BeginTransaction:input_type -> datalayer.v1.BeginTransactionRequest
+	25, // 42: datalayer.v1.DataCRUD.CommitTransaction:input_type -> datalayer.v1.TransactionRequest
+	25, // 43: datalayer.v1.DataCRUD.RollbackTransaction:input_type -> datalayer.v1.TransactionRequest
+	26, // 44: datalayer.v1.Metadata.ListTables:input_type -> datalayer.v1.ListTablesRequest
+	28, // 45: datalayer.v1.Metadata.DescribeTable:input_type -> datalayer.v1.DescribeTableRequest
+	32, // 46: datalayer.v1.RawSql.ExecRawSQL:input_type -> datalayer.v1.ExecRawSQLRequest
+	18, // 47: datalayer.v1.DataCRUD.Query:output_type -> datalayer.v1.QueryResponse
+	22, // 48: datalayer.v1.DataCRUD.Insert:output_type -> datalayer.v1.MutationResponse
+	22, // 49: datalayer.v1.DataCRUD.Update:output_type -> datalayer.v1.MutationResponse
+	22, // 50: datalayer.v1.DataCRUD.Delete:output_type -> datalayer.v1.MutationResponse
+	24, // 51: datalayer.v1.DataCRUD.BeginTransaction:output_type -> datalayer.v1.BeginTransactionResponse
+	36, // 52: datalayer.v1.DataCRUD.CommitTransaction:output_type -> google.protobuf.Empty
+	36, // 53: datalayer.v1.DataCRUD.RollbackTransaction:output_type -> google.protobuf.Empty
+	27, // 54: datalayer.v1.Metadata.ListTables:output_type -> datalayer.v1.ListTablesResponse
+	31, // 55: datalayer.v1.Metadata.DescribeTable:output_type -> datalayer.v1.DescribeTableResponse
+	33, // 56: datalayer.v1.RawSql.ExecRawSQL:output_type -> datalayer.v1.ExecRawSQLResponse
+	47, // [47:57] is the sub-list for method output_type
+	37, // [37:47] is the sub-list for method input_type
+	37, // [37:37] is the sub-list for extension type_name
+	37, // [37:37] is the sub-list for extension extendee
+	0,  // [0:37] is the sub-list for field type_name
 }
 
-func init() { file_api_datalayer_v1_datalayer_proto_init() }
-func file_api_datalayer_v1_datalayer_proto_init() {
-	if File_api_datalayer_v1_datalayer_proto != nil {
+func init() { file_datalayer_proto_init() }
+func file_datalayer_proto_init() {
+	if File_datalayer_proto != nil {
 		return
 	}
-	file_api_datalayer_v1_datalayer_proto_msgTypes[1].OneofWrappers = []any{
+	file_datalayer_proto_msgTypes[1].OneofWrappers = []any{
 		(*Condition_LiteralValue)(nil),
 		(*Condition_SubqueryValue)(nil),
 	}
-	file_api_datalayer_v1_datalayer_proto_msgTypes[2].OneofWrappers = []any{
+	file_datalayer_proto_msgTypes[2].OneofWrappers = []any{
 		(*WhereClause_Condition)(nil),
 		(*WhereClause_NestedClause)(nil),
 	}
@@ -2363,18 +2490,18 @@ func file_api_datalayer_v1_datalayer_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_datalayer_v1_datalayer_proto_rawDesc), len(file_api_datalayer_v1_datalayer_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_datalayer_proto_rawDesc), len(file_datalayer_proto_rawDesc)),
 			NumEnums:      7,
-			NumMessages:   26,
+			NumMessages:   28,
 			NumExtensions: 0,
-			NumServices:   2,
+			NumServices:   3,
 		},
-		GoTypes:           file_api_datalayer_v1_datalayer_proto_goTypes,
-		DependencyIndexes: file_api_datalayer_v1_datalayer_proto_depIdxs,
-		EnumInfos:         file_api_datalayer_v1_datalayer_proto_enumTypes,
-		MessageInfos:      file_api_datalayer_v1_datalayer_proto_msgTypes,
+		GoTypes:           file_datalayer_proto_goTypes,
+		DependencyIndexes: file_datalayer_proto_depIdxs,
+		EnumInfos:         file_datalayer_proto_enumTypes,
+		MessageInfos:      file_datalayer_proto_msgTypes,
 	}.Build()
-	File_api_datalayer_v1_datalayer_proto = out.File
-	file_api_datalayer_v1_datalayer_proto_goTypes = nil
-	file_api_datalayer_v1_datalayer_proto_depIdxs = nil
+	File_datalayer_proto = out.File
+	file_datalayer_proto_goTypes = nil
+	file_datalayer_proto_depIdxs = nil
 }
