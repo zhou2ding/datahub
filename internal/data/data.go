@@ -6,6 +6,10 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis"
 	"github.com/google/wire"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	gormLogger "gorm.io/gorm/logger"
+	"time"
 )
 
 var ProviderSet = wire.NewSet(
@@ -41,4 +45,34 @@ func NewRedisClients(c *conf.Data, logger log.Logger) (*RedisClient, error) {
 	}
 
 	return rdb, nil
+}
+
+type ormLogger struct {
+	*log.Helper
+}
+
+func (o *ormLogger) Printf(format string, args ...interface{}) {
+	o.Infof(format, args...)
+}
+
+func NewDatabase(c *conf.Data, l *conf.Log, logger log.Logger) (map[string]*gorm.DB, error) {
+	dbs := make(map[string]*gorm.DB)
+	for _, source := range c.Databases {
+		db, err := gorm.Open(mysql.Open(source.Dsn), &gorm.Config{})
+		if err != nil {
+			log.NewHelper(logger).Errorf("connect to dib error: %v", err)
+			return nil, err
+		}
+		if l.Stdout {
+			db.Logger = gormLogger.New(&ormLogger{log.NewHelper(logger)}, gormLogger.Config{
+				SlowThreshold:             time.Second,
+				LogLevel:                  gormLogger.Info,
+				IgnoreRecordNotFoundError: false,
+				Colorful:                  false,
+			})
+		}
+		dbs[source.Name] = db
+	}
+
+	return dbs, nil
 }
