@@ -5,16 +5,25 @@ import (
 	"datahub/internal/conf"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis"
+	"github.com/google/uuid"
 	"github.com/google/wire"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
+	"sync"
 	"time"
 )
 
 var ProviderSet = wire.NewSet(
 	NewRedisClients,
 )
+
+type Data struct {
+	db           map[string]*gorm.DB
+	cache        *RedisClient
+	transactions map[string]*gorm.DB // 存储活跃的事务，键是事务ID，值是事务对象
+	txMu         sync.RWMutex        // 用于保护 transactions map 的读写锁
+}
 
 type RedisClient struct {
 	clients map[int32]*redis.Client
@@ -47,6 +56,10 @@ func NewRedisClients(c *conf.Data, logger log.Logger) (*RedisClient, error) {
 	return rdb, nil
 }
 
+func (r *RedisClient) GetRedis(num int32) *redis.Client {
+	return r.clients[num]
+}
+
 type ormLogger struct {
 	*log.Helper
 }
@@ -75,4 +88,19 @@ func NewDatabase(c *conf.Data, l *conf.Log, logger log.Logger) (map[string]*gorm
 	}
 
 	return dbs, nil
+}
+
+func (d *Data) BeginTransaction(dbName string) (string, *gorm.DB, error) {
+	tx := d.db[dbName].Begin()
+	if tx.Error != nil {
+		return "", nil, tx.Error
+	}
+
+	txID := uuid.NewString()
+
+	d.txMu.Lock()
+	d.transactions[txID] = tx
+	d.txMu.Unlock()
+
+	return txID, tx, nil
 }
