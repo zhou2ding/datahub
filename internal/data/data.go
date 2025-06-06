@@ -104,3 +104,14 @@ func (d *Data) BeginTransaction(dbName string) (string, *gorm.DB, error) {
 
 	return txID, tx, nil
 }
+
+func (d *Data) GetTransaction(transactionId string) (*gorm.DB, bool) {
+	if transactionId == "" {
+		return nil, false
+	}
+	d.txMu.RLock()
+	defer d.txMu.RUnlock()
+
+	tx, ok := d.transactions[transactionId]
+	return tx, ok
+}
