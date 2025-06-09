@@ -15,6 +15,8 @@ import (
 )
 
 var ProviderSet = wire.NewSet(
+	NewData,
+	NewDatabase,
 	NewRedisClients,
 )
 
@@ -27,6 +29,67 @@ type Data struct {
 
 type RedisClient struct {
 	clients map[int32]*redis.Client
+}
+
+type ormLogger struct {
+	*log.Helper
+}
+
+func (o *ormLogger) Printf(format string, args ...interface{}) {
+	o.Infof(format, args...)
+}
+
+func NewData(c *conf.Data, logger log.Logger, dbs map[string]*gorm.DB, cache *RedisClient) (*Data, func(), error) {
+	d := &Data{db: dbs, cache: cache, transactions: make(map[string]*gorm.DB)}
+	cleanup := func() {
+		log.NewHelper(logger).Info("closing the data resources")
+
+		//关闭数据库连接
+		for _, db := range d.db {
+			sql, _ := db.DB()
+			_ = sql.Close()
+		}
+
+		//关闭redis连接
+		for _, client := range cache.clients {
+			_ = client.Close()
+		}
+
+		// 清理未完成的事务
+		d.txMu.Lock()
+		if len(d.transactions) > 0 {
+			log.NewHelper(logger).Warnf("found %d unfinished transactions during cleanup. Attempting rollback.", len(d.transactions))
+			for id, tx := range d.transactions {
+				log.NewHelper(logger).Infof("rolling back transaction %s", id)
+				_ = tx.Rollback()
+			}
+			d.transactions = make(map[string]*gorm.DB)
+		}
+		d.txMu.Unlock()
+	}
+	return d, cleanup, nil
+}
+
+func NewDatabase(c *conf.Data, l *conf.Log, logger log.Logger) (map[string]*gorm.DB, error) {
+	dbs := make(map[string]*gorm.DB)
+	for _, source := range c.Databases {
+		db, err := gorm.Open(mysql.Open(source.Dsn), &gorm.Config{})
+		if err != nil {
+			log.NewHelper(logger).Errorf("connect to dib error: %v", err)
+			return nil, err
+		}
+		if l.Stdout {
+			db.Logger = gormLogger.New(&ormLogger{log.NewHelper(logger)}, gormLogger.Config{
+				SlowThreshold:             time.Second,
+				LogLevel:                  gormLogger.Info,
+				IgnoreRecordNotFoundError: false,
+				Colorful:                  false,
+			})
+		}
+		dbs[source.Name] = db
+	}
+
+	return dbs, nil
 }
 
 func NewRedisClients(c *conf.Data, logger log.Logger) (*RedisClient, error) {
@@ -60,36 +123,6 @@ func (r *RedisClient) GetRedis(num int32) *redis.Client {
 	return r.clients[num]
 }
 
-type ormLogger struct {
-	*log.Helper
-}
-
-func (o *ormLogger) Printf(format string, args ...interface{}) {
-	o.Infof(format, args...)
-}
-
-func NewDatabase(c *conf.Data, l *conf.Log, logger log.Logger) (map[string]*gorm.DB, error) {
-	dbs := make(map[string]*gorm.DB)
-	for _, source := range c.Databases {
-		db, err := gorm.Open(mysql.Open(source.Dsn), &gorm.Config{})
-		if err != nil {
-			log.NewHelper(logger).Errorf("connect to dib error: %v", err)
-			return nil, err
-		}
-		if l.Stdout {
-			db.Logger = gormLogger.New(&ormLogger{log.NewHelper(logger)}, gormLogger.Config{
-				SlowThreshold:             time.Second,
-				LogLevel:                  gormLogger.Info,
-				IgnoreRecordNotFoundError: false,
-				Colorful:                  false,
-			})
-		}
-		dbs[source.Name] = db
-	}
-
-	return dbs, nil
-}
-
 func (d *Data) BeginTransaction(dbName string) (string, *gorm.DB, error) {
 	tx := d.db[dbName].Begin()
 	if tx.Error != nil {
@@ -114,4 +147,13 @@ func (d *Data) GetTransaction(transactionId string) (*gorm.DB, bool) {
 
 	tx, ok := d.transactions[transactionId]
 	return tx, ok
+}
+
+func (d *Data) RemoveTransaction(transactionId string) {
+	if transactionId == "" {
+		return
+	}
+	d.txMu.Lock()
+	defer d.txMu.Unlock()
+	delete(d.transactions, transactionId)
 }
