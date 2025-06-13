@@ -4,8 +4,12 @@ import (
 	"context"
 	v1 "datahub/api/datalayer/v1"
 	"datahub/internal/biz"
+	"datahub/pkg/global"
+	"datahub/pkg/md"
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/structpb"
+	"time"
 )
 
 type DatalayerRepo struct {
@@ -24,6 +28,28 @@ var _ biz.DatalayerRepo = (*DatalayerRepo)(nil)
 
 func (r *DatalayerRepo) Query(ctx context.Context, req *v1.QueryRequest) (*v1.QueryResponse, error) {
 	return &v1.QueryResponse{}, nil
+}
+
+func mapToProtoRow(ctx context.Context, record map[string]any) *v1.Row {
+	fields := make(map[string]*structpb.Value)
+	for key, val := range record {
+		var (
+			err      error
+			protoVal *structpb.Value
+		)
+		switch v := val.(type) {
+		case time.Time:
+			protoVal = structpb.NewStringValue(v.Format(time.DateTime))
+		default:
+			// 对于其他标准类型，使用通用的转换
+			protoVal, err = structpb.NewValue(v)
+			if err != nil {
+				log.Errorf("traceId: %s failed to convert value for key '%s' (Go type: %T, value: %v) to Protobuf Value: %v", md.GetMetadata(ctx, global.RequestIdMd), key, val, val, err)
+			}
+		}
+		fields[key] = protoVal
+	}
+	return &v1.Row{Fields: fields}
 }
 
 func (r *DatalayerRepo) Insert(ctx context.Context, req *v1.InsertRequest) (*v1.MutationResponse, error) {
