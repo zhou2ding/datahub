@@ -6,6 +6,7 @@ import (
 	"datahub/internal/biz"
 	"datahub/pkg/global"
 	"datahub/pkg/md"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -50,6 +51,38 @@ func mapToProtoRow(ctx context.Context, record map[string]any) *v1.Row {
 		fields[key] = protoVal
 	}
 	return &v1.Row{Fields: fields}
+}
+
+// 将 Protobuf Value 转换为适合 GORM 的 Go 类型
+func protobufValueToAny(pv *structpb.Value) (any, error) {
+	if pv == nil {
+		return nil, nil
+	}
+	switch pv.Kind.(type) {
+	case *structpb.Value_NullValue:
+		return nil, nil
+	case *structpb.Value_NumberValue:
+		return pv.GetNumberValue(), nil
+	case *structpb.Value_StringValue:
+		return pv.GetStringValue(), nil
+	case *structpb.Value_BoolValue:
+		return pv.GetBoolValue(), nil
+	case *structpb.Value_StructValue:
+		return nil, fmt.Errorf("struct type conversion not implemented for GORM conditions")
+	case *structpb.Value_ListValue:
+		list := pv.GetListValue()
+		goList := make([]any, len(list.Values))
+		for i, v := range list.Values {
+			goVal, err := protobufValueToAny(v)
+			if err != nil {
+				return nil, fmt.Errorf("error converting list element %d: %w", i, err)
+			}
+			goList[i] = goVal
+		}
+		return goList, nil
+	default:
+		return nil, fmt.Errorf("unsupported protobuf value kind: %T", pv.Kind)
+	}
 }
 
 func (r *DatalayerRepo) Insert(ctx context.Context, req *v1.InsertRequest) (*v1.MutationResponse, error) {
