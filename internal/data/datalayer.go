@@ -85,6 +85,42 @@ func protobufValueToAny(pv *structpb.Value) (any, error) {
 	}
 }
 
+// 将 proto Operator 枚举转换为 GORM 字符串操作符和占位符信息
+func getGormOperator(op v1.Operator) (gormOp string, placeholder string, requiresValue bool) {
+	switch op {
+	case v1.Operator_EQ:
+		return "=", "?", true
+	case v1.Operator_NEQ:
+		return "!=", "?", true
+	case v1.Operator_GT:
+		return ">", "?", true
+	case v1.Operator_GTE:
+		return ">=", "?", true
+	case v1.Operator_LT:
+		return "<", "?", true
+	case v1.Operator_LTE:
+		return "<=", "?", true
+	case v1.Operator_IN:
+		return "IN", "", true
+	case v1.Operator_NOT_IN:
+		return "NOT IN", "", true
+	case v1.Operator_LIKE:
+		return "LIKE", "?", true
+	case v1.Operator_NOT_LIKE:
+		return "NOT LIKE", "?", true
+	case v1.Operator_IS_NULL:
+		return "IS NULL", "", false
+	case v1.Operator_IS_NOT_NULL:
+		return "IS NOT NULL", "", false
+	case v1.Operator_EXISTS:
+		return "EXISTS", "", true
+	case v1.Operator_NOT_EXISTS:
+		return "NOT EXISTS", "", true
+	default:
+		return "", "", false
+	}
+}
+
 func (r *DatalayerRepo) Insert(ctx context.Context, req *v1.InsertRequest) (*v1.MutationResponse, error) {
 	return &v1.MutationResponse{}, nil
 }
