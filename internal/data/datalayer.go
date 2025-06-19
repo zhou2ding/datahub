@@ -10,6 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/structpb"
+	"gorm.io/gorm/clause"
 	"time"
 )
 
@@ -119,6 +120,45 @@ func getGormOperator(op v1.Operator) (gormOp string, placeholder string, require
 	default:
 		return "", "", false
 	}
+}
+
+// 构建聚合函数的 SQL 字符串
+func buildAggregationClause(agg *v1.Aggregation) (string, error) {
+	if agg.Alias == "" {
+		return "", fmt.Errorf("aggregation alias is required")
+	}
+	field := agg.Field
+	if field == "" && agg.Function != v1.Aggregation_COUNT {
+		return "", fmt.Errorf("field is required for aggregation function %s", agg.Function)
+	}
+	if field == "" && agg.Function == v1.Aggregation_COUNT {
+		field = "*" // 默认 COUNT 字段
+	}
+
+	safeAlias := clause.Column{Name: agg.Alias}.Name
+	safeField := field
+	if field != "*" {
+		safeField = clause.Column{Name: field}.Name
+	}
+
+	funcName := ""
+	switch agg.Function {
+	case v1.Aggregation_COUNT:
+		funcName = "COUNT"
+	case v1.Aggregation_SUM:
+		funcName = "SUM"
+	case v1.Aggregation_AVG:
+		funcName = "AVG"
+	case v1.Aggregation_MIN:
+		funcName = "MIN"
+	case v1.Aggregation_MAX:
+		funcName = "MAX"
+	default:
+		return "", fmt.Errorf("unsupported aggregation function: %s", agg.Function)
+	}
+
+	// 格式: FUNCTION(field) AS alias
+	return fmt.Sprintf("%s(%s) AS %s", funcName, safeField, safeAlias), nil
 }
 
 func (r *DatalayerRepo) Insert(ctx context.Context, req *v1.InsertRequest) (*v1.MutationResponse, error) {
