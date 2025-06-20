@@ -11,6 +11,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/structpb"
 	"gorm.io/gorm/clause"
+	"strings"
 	"time"
 )
 
@@ -159,6 +160,58 @@ func buildAggregationClause(agg *v1.Aggregation) (string, error) {
 
 	// 格式: FUNCTION(field) AS alias
 	return fmt.Sprintf("%s(%s) AS %s", funcName, safeField, safeAlias), nil
+}
+
+// 构建 GORM Joins 字符串
+func buildJoinClause(primaryTable string, join *v1.Join) (string, error) {
+	if join.TargetTable == "" {
+		return "", fmt.Errorf("join target_table is required")
+	}
+	if len(join.OnConditions) == 0 {
+		return "", fmt.Errorf("join on_conditions are required")
+	}
+
+	joinTypeStr := ""
+	switch join.Type {
+	case v1.JoinType_INNER:
+		joinTypeStr = "INNER JOIN"
+	case v1.JoinType_LEFT:
+		joinTypeStr = "LEFT JOIN"
+	case v1.JoinType_RIGHT:
+		joinTypeStr = "RIGHT JOIN"
+	case v1.JoinType_JOIN_TYPE_UNSPECIFIED:
+		joinTypeStr = "INNER JOIN" //默认为 INNER JOIN
+	default:
+		return "", fmt.Errorf("unsupported join type: %s", join.Type)
+	}
+
+	var onConditionStrings []string
+	for _, cond := range join.OnConditions {
+		if cond.FieldFromPrimaryTable == "" || cond.FieldFromJoinedTable == "" {
+			return "", fmt.Errorf("join condition fields cannot be empty")
+		}
+		// 如果未指定或无效，默认为 EQ 操作符用于连接
+		opStr := "="
+		if cond.Operator != v1.Operator_OPERATOR_UNSPECIFIED && cond.Operator != v1.Operator_EQ {
+			// 通常仅允许 EQ 用于连接
+			return "", fmt.Errorf("only EQ operator is typically supported in JOIN ON conditions, got: %s", cond.Operator)
+		}
+
+		quotedPrimaryTable := "`" + primaryTable + "`"
+		quotedTargetTable := "`" + join.TargetTable + "`"
+
+		quotedPrimaryField := "`" + cond.FieldFromPrimaryTable + "`"
+		quotedJoinedField := "`" + cond.FieldFromJoinedTable + "`"
+
+		// 拼接成 table.field 格式
+		qualifiedPrimaryField := fmt.Sprintf("%s.%s", quotedPrimaryTable, quotedPrimaryField)
+		qualifiedJoinedField := fmt.Sprintf("%s.%s", quotedTargetTable, quotedJoinedField)
+
+		onConditionStrings = append(onConditionStrings, fmt.Sprintf("%s %s %s", qualifiedPrimaryField, opStr, qualifiedJoinedField))
+	}
+
+	// 格式: JOIN_TYPE target_table ON (condition1 AND condition2 ...)
+	return fmt.Sprintf("%s %s ON %s", joinTypeStr, join.TargetTable, strings.Join(onConditionStrings, " AND ")), nil
 }
 
 func (r *DatalayerRepo) Insert(ctx context.Context, req *v1.InsertRequest) (*v1.MutationResponse, error) {
