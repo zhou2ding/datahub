@@ -33,6 +33,103 @@ func (r *DatalayerRepo) Query(ctx context.Context, req *v1.QueryRequest) (*v1.Qu
 	return &v1.QueryResponse{}, nil
 }
 
+// 递归构建 GORM where 表达式和参数
+func (r *DatalayerRepo) buildWhereConditions(ctx context.Context, wc *v1.WhereClause) (string, []any, error) {
+	if wc == nil {
+		return "", nil, nil
+	}
+
+	switch clauseType := wc.ClauseType.(type) {
+	case *v1.WhereClause_Condition:
+		//单条件查询
+		cond := clauseType.Condition
+		if cond.Field == "" {
+			return "", nil, fmt.Errorf("condition field is required")
+		}
+		field := cond.Field
+
+		op, placeholder, requiresValue := getGormOperator(cond.Operator)
+		if op == "" {
+			return "", nil, fmt.Errorf("unsupported operator: %s", cond.Operator)
+		}
+
+		if !requiresValue {
+			// 处理 IS NULL, IS NOT NULL
+			return fmt.Sprintf("%s %s", field, op), nil, nil
+		}
+
+		var valueArg any
+
+		switch opVal := cond.OperandType.(type) {
+		case *v1.Condition_LiteralValue:
+			//普通查询
+			literalProtoVal := opVal.LiteralValue
+			val, err := protobufValueToAny(literalProtoVal)
+			if err != nil {
+				return "", nil, fmt.Errorf("invalid literal value for field '%s': %w", cond.Field, err)
+			}
+
+			// 专门处理 IN, NOT IN
+			if cond.Operator == v1.Operator_IN || cond.Operator == v1.Operator_NOT_IN {
+				listVal, ok := val.([]any)
+				if !ok {
+					return "", nil, fmt.Errorf("literal value for IN/NOT IN operator must be a list, got %T for field '%s'", val, cond.Field)
+				}
+				if len(listVal) == 0 {
+					// 处理 IN/NOT IN 的空列表（IN () 总是假，NOT IN () 总是真）
+					if cond.Operator == v1.Operator_IN {
+						return "1=0", nil, nil
+					} else {
+						return "1=1", nil, nil
+					}
+				}
+				valueArg = listVal
+				return fmt.Sprintf("%s %s (?)", field, op), []any{valueArg}, nil
+			}
+			valueArg = val
+			return fmt.Sprintf("%s %s %s", field, op, placeholder), []any{valueArg}, nil
+
+		default:
+			return "", nil, fmt.Errorf("condition for field '%s' requires a value or subquery but received unknown type: %T", cond.Field, cond.OperandType)
+		}
+
+	case *v1.WhereClause_NestedClause:
+		//多条件查询
+		nested := clauseType.NestedClause
+		if len(nested.Clauses) == 0 {
+			return "", nil, nil
+		}
+
+		var subExprs []string
+		var allArgs []any
+		logicOp := " AND "
+		if nested.LogicalOperator == v1.LogicalOperator_OR {
+			logicOp = " OR "
+		}
+
+		for i, subClause := range nested.Clauses {
+			subExpr, subArgs, err := r.buildWhereConditions(ctx, subClause)
+			if err != nil {
+				return "", nil, fmt.Errorf("error in nested clause element %d: %w", i, err)
+			}
+			if subExpr != "" {
+				// 为确保正确优先级，将子表达式包裹在括号中
+				subExprs = append(subExprs, "("+subExpr+")")
+				allArgs = append(allArgs, subArgs...)
+			}
+		}
+
+		if len(subExprs) == 0 {
+			return "", nil, nil
+		}
+
+		return strings.Join(subExprs, logicOp), allArgs, nil
+
+	default:
+		return "", nil, fmt.Errorf("unknown where clause type: %T", wc.ClauseType)
+	}
+}
+
 func mapToProtoRow(ctx context.Context, record map[string]any) *v1.Row {
 	fields := make(map[string]*structpb.Value)
 	for key, val := range record {
