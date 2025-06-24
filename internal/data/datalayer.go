@@ -10,6 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/structpb"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"strings"
 	"time"
@@ -128,6 +129,95 @@ func (r *DatalayerRepo) buildWhereConditions(ctx context.Context, wc *v1.WhereCl
 	default:
 		return "", nil, fmt.Errorf("unknown where clause type: %T", wc.ClauseType)
 	}
+}
+
+// 构建子查询语句
+func (r *DatalayerRepo) buildSubQuery(ctx context.Context, req *v1.QueryRequest) (*gorm.DB, error) {
+	if req.Table == nil || req.Table.TableName == "" {
+		return nil, fmt.Errorf("subquery table and table_name required")
+	}
+	if req.Table.DbName == "" {
+		return nil, fmt.Errorf("subquery DbName required")
+	}
+
+	db := r.data.db[req.Table.DbName].WithContext(ctx)
+	if req.TransactionId != "" {
+		tx, ok := r.data.GetTransaction(req.TransactionId)
+		if !ok {
+			return nil, fmt.Errorf("transaction %s for subquery not found or expired", req.TransactionId)
+		}
+		db = tx.WithContext(ctx)
+	}
+
+	db = db.Table(req.Table.TableName)
+
+	// 1. 构建 Select 子句
+	selectClauses := make([]string, 0, len(req.SelectFields))
+	if len(req.SelectFields) > 0 {
+		for _, sf := range req.SelectFields {
+			selectClauses = append(selectClauses, r.data.db[req.Table.DbName].NamingStrategy.ColumnName("", sf))
+		}
+	}
+	for _, agg := range req.Aggregations {
+		aggStr, err := buildAggregationClause(agg)
+		if err != nil {
+			return nil, fmt.Errorf("subquery aggregation error: %w", err)
+		}
+		selectClauses = append(selectClauses, aggStr)
+	}
+
+	if len(selectClauses) == 0 {
+		// Depending on the SQL dialect and usage (e.g. EXISTS), SELECT * might be implied
+		// or an error if not selecting specific columns for IN/scalar comparison.
+		// For safety, require explicit select for subqueries unless it's an EXISTS.
+		// However, GORM might handle `db.Model(&SomeModel{})` without explicit Select for subqueries too.
+		// To be safe for IN or scalar, an explicit select is better.
+		// If for EXISTS, you could db.Select("1")
+		return nil, fmt.Errorf("subquery must have select_fields or aggregations defined")
+	}
+	db = db.Select(strings.Join(selectClauses, ", "))
+
+	// 2. 构建 Where 子句
+	for _, join := range req.Joins {
+		joinStr, err := buildJoinClause(req.Table.TableName, join)
+		if err != nil {
+			return nil, fmt.Errorf("subquery join error: %w", err)
+		}
+		db = db.Joins(joinStr)
+	}
+
+	// 3. 构建 Where 子句 (Recursive call potential here)
+	if req.WhereClause != nil {
+		whereExpr, args, err := r.buildWhereConditions(ctx, req.WhereClause)
+		if err != nil {
+			return nil, fmt.Errorf("subquery where clause error: %w", err)
+		}
+		if whereExpr != "" {
+			db = db.Where(whereExpr, args...)
+		}
+	}
+
+	// 4. 构建 Group By 子句
+	if req.GroupBy != nil && len(req.GroupBy.Fields) > 0 {
+		quotedGroupByFields := make([]string, len(req.GroupBy.Fields))
+		for i, f := range req.GroupBy.Fields {
+			quotedGroupByFields[i] = r.data.db[req.Table.DbName].NamingStrategy.ColumnName("", f)
+		}
+		db = db.Group(strings.Join(quotedGroupByFields, ", "))
+	}
+
+	// 5. 构建 Having 子句 (Recursive call potential here)
+	if req.HavingClause != nil {
+		havingExpr, args, err := r.buildWhereConditions(ctx, req.HavingClause) // Pass ctx and r
+		if err != nil {
+			return nil, fmt.Errorf("subquery having clause error: %w", err)
+		}
+		if havingExpr != "" {
+			db = db.Having(havingExpr, args...)
+		}
+	}
+
+	return db, nil
 }
 
 func mapToProtoRow(ctx context.Context, record map[string]any) *v1.Row {
