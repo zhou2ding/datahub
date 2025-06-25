@@ -1287,6 +1287,10 @@ type InsertRequest struct {
 	OnConflict ConflictAction         `protobuf:"varint,3,opt,name=on_conflict,json=onConflict,proto3,enum=datalayer.v1.ConflictAction" json:"on_conflict,omitempty"` // How to handle conflicts (e.g., IGNORE)
 	// Optional: Transaction ID if part of a transaction
 	TransactionId string `protobuf:"bytes,4,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	// required when on_conflict is UPSERT. Specifies the column that defines the conflict (e.g., unique key).
+	ConflictColumns []string `protobuf:"bytes,5,rep,name=conflict_columns,json=conflictColumns,proto3" json:"conflict_columns,omitempty"`
+	// required when on_conflict is UPSERT. Specifies the column to be updated when a conflict occurs.
+	UpdateColumns []string `protobuf:"bytes,6,rep,name=update_columns,json=updateColumns,proto3" json:"update_columns,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1347,6 +1351,20 @@ func (x *InsertRequest) GetTransactionId() string {
 		return x.TransactionId
 	}
 	return ""
+}
+
+func (x *InsertRequest) GetConflictColumns() []string {
+	if x != nil {
+		return x.ConflictColumns
+	}
+	return nil
+}
+
+func (x *InsertRequest) GetUpdateColumns() []string {
+	if x != nil {
+		return x.UpdateColumns
+	}
+	return nil
 }
 
 // --- Update ---
@@ -2225,13 +2243,15 @@ const file_datalayer_proto_rawDesc = "" +
 	"\rQueryResponse\x12%\n" +
 	"\x04rows\x18\x01 \x03(\v2\x11.datalayer.v1.RowR\x04rows\x12\x1f\n" +
 	"\vtotal_count\x18\x02 \x01(\x03R\n" +
-	"totalCount\"\xcd\x01\n" +
+	"totalCount\"\x9f\x02\n" +
 	"\rInsertRequest\x12/\n" +
 	"\x05table\x18\x01 \x01(\v2\x19.datalayer.v1.TableSchemaR\x05table\x12%\n" +
 	"\x04rows\x18\x02 \x03(\v2\x11.datalayer.v1.RowR\x04rows\x12=\n" +
 	"\von_conflict\x18\x03 \x01(\x0e2\x1c.datalayer.v1.ConflictActionR\n" +
 	"onConflict\x12%\n" +
-	"\x0etransaction_id\x18\x04 \x01(\tR\rtransactionId\"\xa4\x02\n" +
+	"\x0etransaction_id\x18\x04 \x01(\tR\rtransactionId\x12)\n" +
+	"\x10conflict_columns\x18\x05 \x03(\tR\x0fconflictColumns\x12%\n" +
+	"\x0eupdate_columns\x18\x06 \x03(\tR\rupdateColumns\"\xa4\x02\n" +
 	"\rUpdateRequest\x12/\n" +
 	"\x05table\x18\x01 \x01(\v2\x19.datalayer.v1.TableSchemaR\x05table\x12%\n" +
 	"\x04data\x18\x02 \x01(\v2\x11.datalayer.v1.RowR\x04data\x12<\n" +

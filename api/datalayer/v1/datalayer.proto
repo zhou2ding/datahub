@@ -239,6 +239,11 @@ message InsertRequest {
   ConflictAction on_conflict = 3;        // How to handle conflicts (e.g., IGNORE)
   // Optional: Transaction ID if part of a transaction
   string transaction_id = 4;
+
+  // required when on_conflict is UPSERT. Specifies the column that defines the conflict (e.g., unique key).
+  repeated string conflict_columns = 5;
+  // required when on_conflict is UPSERT. Specifies the column to be updated when a conflict occurs.
+  repeated string update_columns = 6;
 }
 
 // --- Update ---

@@ -7,6 +7,7 @@ import (
 	"datahub/pkg/global"
 	"datahub/pkg/md"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -402,7 +403,95 @@ func buildJoinClause(primaryTable string, join *v1.Join) (string, error) {
 }
 
 func (r *DatalayerRepo) Insert(ctx context.Context, req *v1.InsertRequest) (*v1.MutationResponse, error) {
-	return &v1.MutationResponse{}, nil
+	if req.Table == nil {
+		return nil, errors.BadRequest(v1.ReasonInvalidArgument, "table required")
+	}
+	if len(req.Rows) == 0 {
+		return nil, errors.BadRequest(v1.ReasonInvalidArgument, "rows cannot be empty")
+	}
+
+	traceId := md.GetMetadata(ctx, global.RequestIdMd)
+	r.log.Debugf("traceId: %s insert req: %+v", traceId, req)
+
+	db := r.data.db[req.Table.DbName].WithContext(ctx)
+	if req.TransactionId != "" {
+		tx, ok := r.data.GetTransaction(req.TransactionId)
+		if !ok {
+			return nil, errors.NotFound(v1.ReasonInvalidTransactionID, fmt.Sprintf("transaction %s not found or expired", req.TransactionId))
+		}
+		db = tx.WithContext(ctx) // 在事务中执行
+		r.log.Debugf("traceId: %s insert is executing within transaction: %s", traceId, req.TransactionId)
+	}
+
+	// 1. 转换数据类型
+	recordsToInsert := make([]map[string]any, 0, len(req.Rows))
+	for i, protoRow := range req.Rows {
+		if protoRow == nil || len(protoRow.Fields) == 0 {
+			r.log.Warnf("traceId: %s skipping empty row at index %d during insert into table %s", traceId, i, req.Table)
+			continue
+		}
+
+		record := make(map[string]any)
+		for key, protoVal := range protoRow.Fields {
+			goVal, err := protobufValueToAny(protoVal)
+			if err != nil {
+				r.log.Errorf("traceId: %s failed to convert value for key '%s' in row %d: %v", traceId, key, i, err)
+				return nil, errors.BadRequest(v1.ReasonInvalidArgument, fmt.Sprintf("invalid value for field '%s': %v", key, err))
+			}
+			record[key] = goVal
+		}
+		recordsToInsert = append(recordsToInsert, record)
+	}
+
+	if len(recordsToInsert) == 0 {
+		r.log.Warnf("traceId: %s no valid rows to insert into table %s after processing input.", traceId, req.Table)
+		return &v1.MutationResponse{AffectedRows: 0}, nil
+	}
+
+	// 2. 构建 GORM 操作
+	tx := db.Table(req.Table.TableName)
+
+	// 处理冲突策略
+	switch req.OnConflict {
+	case v1.ConflictAction_IGNORE:
+		tx = tx.Clauses(clause.OnConflict{DoNothing: true})
+	case v1.ConflictAction_UPSERT:
+		if len(req.ConflictColumns) == 0 {
+			return nil, errors.BadRequest(v1.ReasonInvalidArgument, "conflict_columns field is required for UPSERT operation")
+		}
+		if len(req.UpdateColumns) == 0 {
+			return nil, errors.BadRequest(v1.ReasonInvalidArgument, "update_columns field is required for UPSERT operation")
+		}
+		cols := make([]clause.Column, len(req.ConflictColumns))
+		for i, col := range req.ConflictColumns {
+			cols[i] = clause.Column{Name: col}
+		}
+		// 更新指定的列
+		tx = tx.Clauses(clause.OnConflict{
+			Columns:   cols,
+			DoUpdates: clause.AssignmentColumns(req.UpdateColumns),
+		})
+	case v1.ConflictAction_FAIL, v1.ConflictAction_CONFLICT_ACTION_UNSPECIFIED:
+		// 默认行为，如果冲突则数据库会报错
+	default:
+		return nil, errors.BadRequest(v1.ReasonInvalidArgument, fmt.Sprintf("unsupported conflict action: %s", req.OnConflict))
+	}
+
+	result := tx.Create(&recordsToInsert)
+	if result.Error != nil {
+		r.log.Errorf("traceId: %s insert failed to table %s: %v", traceId, req.Table, result.Error)
+		if strings.Contains(result.Error.Error(), "Duplicate") {
+			return nil, errors.Conflict(v1.ReasonDuplicate, result.Error.Error())
+		} else {
+			return nil, errors.InternalServer(v1.ReasonInsertFailed, result.Error.Error())
+		}
+	}
+
+	resp := &v1.MutationResponse{
+		AffectedRows: result.RowsAffected,
+	}
+
+	return resp, nil
 }
 
 func (r *DatalayerRepo) Update(ctx context.Context, req *v1.UpdateRequest) (*v1.MutationResponse, error) {
