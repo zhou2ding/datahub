@@ -495,7 +495,70 @@ func (r *DatalayerRepo) Insert(ctx context.Context, req *v1.InsertRequest) (*v1.
 }
 
 func (r *DatalayerRepo) Update(ctx context.Context, req *v1.UpdateRequest) (*v1.MutationResponse, error) {
-	return &v1.MutationResponse{}, nil
+	if req.Table == nil {
+		return nil, errors.BadRequest(v1.ReasonInvalidArgument, "table required")
+	}
+	if req.Data == nil || len(req.Data.Fields) == 0 {
+		return nil, errors.BadRequest(v1.ReasonInvalidArgument, "update data cannot be empty")
+	}
+	if req.WhereClause == nil {
+		return nil, errors.BadRequest(v1.ReasonInvalidArgument, "where clause is required for updates")
+	}
+
+	traceId := md.GetMetadata(ctx, global.RequestIdMd)
+
+	r.log.Debugf("traceId: %s update req: Table=%s, Data=%v, Where=%v, TxID=%s", traceId, req.Table, req.Data, req.WhereClause, req.TransactionId)
+
+	db := r.data.db[req.Table.DbName].WithContext(ctx)
+	if req.TransactionId != "" {
+		tx, ok := r.data.GetTransaction(req.TransactionId)
+		if !ok {
+			return nil, errors.NotFound(v1.ReasonInvalidTransactionID, fmt.Sprintf("transaction %s not found or expired", req.TransactionId))
+		}
+		db = tx.WithContext(ctx) // 在事务中执行
+		r.log.Debugf("traceId: %s update is executing within transaction: %s", traceId, req.TransactionId)
+	}
+
+	// 1. 构造update map
+	updateData := make(map[string]any)
+	for key, protoVal := range req.Data.Fields {
+		goVal, err := protobufValueToAny(protoVal)
+		if err != nil {
+			r.log.Errorf("traceId: %s failed to convert update value for key '%s': %v", traceId, key, err)
+			return nil, errors.BadRequest(v1.ReasonInvalidArgument, fmt.Sprintf("invalid value for field '%s': %v", key, err))
+		}
+		updateData[key] = goVal
+	}
+
+	if len(updateData) == 0 {
+		r.log.Warnf("traceId: %s no valid update data provided after conversion", traceId)
+		return &v1.MutationResponse{AffectedRows: 0}, nil
+	}
+
+	db = db.Table(req.Table.TableName)
+
+	// 2. 构建where子句
+	whereExpr, args, err := r.buildWhereConditions(ctx, req.WhereClause)
+	if err != nil {
+		return nil, errors.BadRequest("INVALID_WHERE_CLAUSE", err.Error())
+	}
+	if whereExpr == "" {
+		r.log.Warnf("traceId: %s update on table '%s' resulted in an empty effective WHERE clause!!!", traceId, req.Table)
+	} else {
+		db = db.Where(whereExpr, args...)
+	}
+
+	result := db.Updates(updateData)
+	if result.Error != nil {
+		r.log.Errorf("traceId: %s update failed for table %s: %v", traceId, req.Table, result.Error)
+		return nil, errors.InternalServer(v1.ReasonUpdateFailed, result.Error.Error())
+	}
+
+	resp := &v1.MutationResponse{
+		AffectedRows: result.RowsAffected,
+	}
+
+	return resp, nil
 }
 
 func (r *DatalayerRepo) Delete(ctx context.Context, req *v1.DeleteRequest) (*v1.MutationResponse, error) {
