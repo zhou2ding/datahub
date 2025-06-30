@@ -562,7 +562,52 @@ func (r *DatalayerRepo) Update(ctx context.Context, req *v1.UpdateRequest) (*v1.
 }
 
 func (r *DatalayerRepo) Delete(ctx context.Context, req *v1.DeleteRequest) (*v1.MutationResponse, error) {
-	return &v1.MutationResponse{}, nil
+	if req.Table == nil {
+		return nil, errors.BadRequest(v1.ReasonInvalidArgument, "table required")
+	}
+	if req.WhereClause == nil {
+		return nil, errors.BadRequest(v1.ReasonInvalidArgument, "where clause is required for delete")
+	}
+
+	traceId := md.GetMetadata(ctx, global.RequestIdMd)
+
+	r.log.Debugf("traceId: %s delete req: %+v", traceId, req)
+
+	db := r.data.db[req.Table.DbName].WithContext(ctx)
+	if req.TransactionId != "" {
+		tx, ok := r.data.GetTransaction(req.TransactionId)
+		if !ok {
+			r.log.Warnf("traceId: %s delete failed: transaction %s not found or expired", traceId, req.TransactionId)
+			return nil, errors.NotFound(v1.ReasonInvalidTransactionID, fmt.Sprintf("transaction %s not found or expired", req.TransactionId))
+		}
+		db = tx.WithContext(ctx) // 在事务中执行
+		r.log.Debugf("traceId: %s delete is executing within transaction: %s", traceId, req.TransactionId)
+	}
+
+	// 1. 构建 WHERE 子句
+	whereExpr, args, err := r.buildWhereConditions(ctx, req.WhereClause)
+	if err != nil {
+		r.log.Errorf("traceId: %s failed to build where conditions for delete on table %s: %v", traceId, req.Table, err)
+		return nil, errors.BadRequest(v1.ReasonInvalidWhereClause, err.Error())
+	}
+
+	if whereExpr == "" {
+		r.log.Errorf("traceId: %s delete on table '%s' aborted: effective WHERE clause is empty", traceId, req.Table)
+		return nil, errors.BadRequest(v1.ReasonInvalidWhereClause, "effective WHERE clause is empty")
+	}
+
+	result := db.Table(req.Table.TableName).Where(whereExpr, args...).Delete(nil)
+
+	if result.Error != nil {
+		r.log.Errorf("traceId: %s database delete failed for table %s: %v", traceId, req.Table, result.Error)
+		return nil, errors.InternalServer(v1.ReasonDeleteFailed, result.Error.Error())
+	}
+
+	resp := &v1.MutationResponse{
+		AffectedRows: result.RowsAffected,
+	}
+
+	return resp, nil
 }
 
 func (r *DatalayerRepo) BeginTransaction(ctx context.Context, req *v1.BeginTransactionRequest) (*v1.BeginTransactionResponse, error) {
