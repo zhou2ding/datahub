@@ -611,7 +611,17 @@ func (r *DatalayerRepo) Delete(ctx context.Context, req *v1.DeleteRequest) (*v1.
 }
 
 func (r *DatalayerRepo) BeginTransaction(ctx context.Context, req *v1.BeginTransactionRequest) (*v1.BeginTransactionResponse, error) {
-	return &v1.BeginTransactionResponse{}, nil
+	traceId := md.GetMetadata(ctx, global.RequestIdMd)
+	txID, _, err := r.data.BeginTransaction(req.DbName)
+	if err != nil {
+		r.log.Errorf("traceId: %s failed to begin transaction: %v", traceId, err)
+		return nil, errors.InternalServer(v1.ReasonTransactionError, fmt.Sprintf("failed to begin transaction: %v", err))
+	}
+
+	r.log.Infof("traceId: %s successfully started new transaction, id: %s", traceId, txID)
+	return &v1.BeginTransactionResponse{
+		TransactionId: txID,
+	}, nil
 }
 
 func (r *DatalayerRepo) CommitTransaction(ctx context.Context, req *v1.TransactionRequest) (*emptypb.Empty, error) {
