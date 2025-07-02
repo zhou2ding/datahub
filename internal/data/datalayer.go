@@ -625,6 +625,30 @@ func (r *DatalayerRepo) BeginTransaction(ctx context.Context, req *v1.BeginTrans
 }
 
 func (r *DatalayerRepo) CommitTransaction(ctx context.Context, req *v1.TransactionRequest) (*emptypb.Empty, error) {
+	traceId := md.GetMetadata(ctx, global.RequestIdMd)
+	if req.TransactionId == "" {
+		r.log.Warnf("traceId: %s commit transaction failed: transaction_id cannot be empty", traceId)
+		return nil, errors.BadRequest(v1.ReasonInvalidArgument, "transaction_id is required")
+	}
+
+	r.log.Infof("traceId: %s commit transaction request for id: %s", req.TransactionId, traceId)
+
+	tx, ok := r.data.GetTransaction(req.TransactionId)
+	if !ok {
+		r.log.Warnf("traceId: %s commit transaction failed: transaction %s not found or expired", traceId, req.TransactionId)
+		return nil, errors.NotFound(v1.ReasonInvalidTransactionID, fmt.Sprintf("transaction %s not found or expired", req.TransactionId))
+	}
+
+	err := tx.Commit().Error
+	// 无论成功或失败，都需要从 map 中移除事务记录
+	r.data.RemoveTransaction(req.TransactionId)
+
+	if err != nil {
+		r.log.Errorf("traceId: %s failed to commit transaction %s: %v", traceId, req.TransactionId, err)
+		return nil, errors.InternalServer(v1.ReasonTransactionCommitFailed, fmt.Sprintf("failed to commit transaction %s: %v", req.TransactionId, err))
+	}
+
+	r.log.Infof("traceId: %s transaction %s committed successfully", traceId, req.TransactionId)
 	return &emptypb.Empty{}, nil
 }
 
