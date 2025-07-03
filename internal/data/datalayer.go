@@ -653,6 +653,29 @@ func (r *DatalayerRepo) CommitTransaction(ctx context.Context, req *v1.Transacti
 }
 
 func (r *DatalayerRepo) RollbackTransaction(ctx context.Context, req *v1.TransactionRequest) (*emptypb.Empty, error) {
+	traceId := md.GetMetadata(ctx, global.RequestIdMd)
+	if req.TransactionId == "" {
+		r.log.Warnf("traceId: %s rollback transaction failed: transaction_id cannot be empty", traceId)
+		return nil, errors.BadRequest(v1.ReasonInvalidArgument, "transaction_id is required")
+	}
+
+	r.log.Infof("traceId: %s rollback transaction request for id: %s", traceId, req.TransactionId)
+
+	tx, ok := r.data.GetTransaction(req.TransactionId)
+	if !ok {
+		r.log.Warnf("traceId: %s transaction %s not found or expired", traceId, req.TransactionId)
+		return nil, nil
+	}
+
+	err := tx.Rollback().Error
+	// 无论成功或失败，都需要从 map 中移除事务记录
+	r.data.RemoveTransaction(req.TransactionId)
+
+	if err != nil {
+		r.log.Errorf("traceId: %s failed to rollback transaction %s: %v", req.TransactionId, traceId, err)
+		return nil, errors.InternalServer(v1.ReasonTransactionRollbackFailed, fmt.Sprintf("failed to rollback transaction %s: %v", req.TransactionId, err))
+	}
+
 	return &emptypb.Empty{}, nil
 }
 
