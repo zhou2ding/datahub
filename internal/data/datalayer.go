@@ -680,7 +680,12 @@ func (r *DatalayerRepo) RollbackTransaction(ctx context.Context, req *v1.Transac
 }
 
 func (r *DatalayerRepo) ListTables(ctx context.Context, req *v1.ListTablesRequest) (*v1.ListTablesResponse, error) {
-	return &v1.ListTablesResponse{}, nil
+	tables, err := r.data.db[req.DbName].Migrator().GetTables()
+	if err != nil {
+		r.log.Warnf("traceId: %s list tables error: %v", md.GetMetadata(ctx, global.RequestIdMd), err)
+		return nil, errors.InternalServer(v1.ReasonListTablesFailed, err.Error())
+	}
+	return &v1.ListTablesResponse{TableNames: tables}, nil
 }
 
 func (r *DatalayerRepo) DescribeTable(ctx context.Context, req *v1.DescribeTableRequest) (*v1.DescribeTableResponse, error) {
