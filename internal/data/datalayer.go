@@ -689,7 +689,75 @@ func (r *DatalayerRepo) ListTables(ctx context.Context, req *v1.ListTablesReques
 }
 
 func (r *DatalayerRepo) DescribeTable(ctx context.Context, req *v1.DescribeTableRequest) (*v1.DescribeTableResponse, error) {
-	return &v1.DescribeTableResponse{}, nil
+	if req.Table == nil {
+		return nil, errors.BadRequest(v1.ReasonInvalidArgument, "table required")
+	}
+
+	traceId := md.GetMetadata(ctx, global.RequestIdMd)
+
+	db := r.data.db[req.Table.DbName]
+	migrator := db.Migrator()
+
+	if !migrator.HasTable(req.Table.TableName) {
+		r.log.Warnf("traceId: %s table %s not found", traceId, req.Table.TableName)
+		return nil, errors.NotFound(v1.ReasonDescribeTablesFailed, fmt.Sprintf("table '%s' not found", req.Table.TableName))
+	}
+
+	resp := &v1.DescribeTableResponse{
+		TableName: req.Table.TableName,
+		Columns:   make([]*v1.ColumnMetadata, 0),
+		Indices:   make([]*v1.IndexMetadata, 0),
+	}
+
+	// 2. Get Column Information
+	columnTypes, err := migrator.ColumnTypes(req.Table.TableName)
+	if err != nil {
+		r.log.Errorf("traceId: %s failed to get column types for table %s: %v", traceId, req.Table.TableName, err)
+		return nil, errors.InternalServer(v1.ReasonDescribeTablesFailed, err.Error())
+	}
+
+	for _, colType := range columnTypes {
+		colMeta := &v1.ColumnMetadata{
+			Name:     colType.Name(),
+			DataType: colType.DatabaseTypeName(),
+		}
+
+		if nullable, ok := colType.Nullable(); ok {
+			colMeta.IsNullable = nullable
+		}
+		if defaultValue, ok := colType.DefaultValue(); ok {
+			colMeta.DefaultValue = defaultValue
+		}
+		if isPrimary, ok := colType.PrimaryKey(); ok {
+			colMeta.IsPrimaryKey = isPrimary
+		}
+		if length, ok := colType.Length(); ok {
+			colMeta.MaxLength = length
+		}
+
+		resp.Columns = append(resp.Columns, colMeta)
+	}
+
+	indexes, err := migrator.GetIndexes(req.Table.TableName)
+	if err != nil {
+		r.log.Errorf("traceId: %s failed to get indexes for table %s: %v", traceId, req.Table.TableName, err)
+		return nil, errors.InternalServer(v1.ReasonDescribeTablesFailed, err.Error())
+	}
+
+	for _, index := range indexes {
+		idxMeta := &v1.IndexMetadata{
+			Name:      index.Name(),
+			Columns:   index.Columns(),
+			IndexType: "",
+		}
+		if isUnique, ok := index.Unique(); ok {
+			idxMeta.IsUnique = isUnique
+		}
+
+		resp.Indices = append(resp.Indices, idxMeta)
+	}
+
+	return resp, nil
 }
 
 func (r *DatalayerRepo) ExecRawSQL(ctx context.Context, req *v1.ExecRawSQLRequest) (*v1.ExecRawSQLResponse, error) {
