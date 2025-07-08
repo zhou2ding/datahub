@@ -21,4 +21,6 @@ const (
 
 	ReasonListTablesFailed     = "LIST_TABLES_FAILED"
 	ReasonDescribeTablesFailed = "DESCRIBE_TABLE_FAILED"
+
+	ReasonExecRawSqlFailed = "EXEC_Raw_SQL_FAILED"
 )

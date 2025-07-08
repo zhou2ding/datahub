@@ -761,5 +761,29 @@ func (r *DatalayerRepo) DescribeTable(ctx context.Context, req *v1.DescribeTable
 }
 
 func (r *DatalayerRepo) ExecRawSQL(ctx context.Context, req *v1.ExecRawSQLRequest) (*v1.ExecRawSQLResponse, error) {
-	return &v1.ExecRawSQLResponse{}, nil
+	traceId := md.GetMetadata(ctx, global.RequestIdMd)
+	if req.Db == "" {
+		return nil, errors.BadRequest(v1.ReasonInvalidArgument, "db required")
+	}
+	if req.Sql == "" {
+		return nil, errors.BadRequest(v1.ReasonInvalidArgument, "sql required")
+	}
+
+	db := r.data.db[req.Db].WithContext(ctx)
+	if req.TransactionId != "" {
+		tx, ok := r.data.GetTransaction(req.TransactionId)
+		if !ok {
+			return nil, errors.NotFound(v1.ReasonInvalidTransactionID, fmt.Sprintf("transaction %s not found", req.TransactionId))
+		}
+		db = tx
+		r.log.Debugf("traceId:%s execute raw sql within transaction %s", traceId, req.TransactionId)
+	}
+
+	result := db.Exec(req.Sql)
+	if err := result.Error; err != nil {
+		r.log.Errorf("traceId: %s failed to execute raw sql: %v", traceId, err)
+		return nil, errors.InternalServer(v1.ReasonExecRawSqlFailed, err.Error())
+	}
+
+	return &v1.ExecRawSQLResponse{AffectedRows: result.RowsAffected}, nil
 }
