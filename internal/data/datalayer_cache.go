@@ -1,6 +1,8 @@
 package data
 
 import (
+	"context"
+	v1 "datahub/api/datalayer/v1"
 	"datahub/internal/biz"
 	"time"
 
@@ -23,4 +25,8 @@ func NewCachingDatalayerRepo(wrapped *DatalayerRepo, cache *RedisClient, logger 
 		cache:   cache,
 		log:     log.NewHelper(logger),
 	}
+}
+
+func (r *CachingDatalayerRepo) ExecRawSQL(ctx context.Context, req *v1.ExecRawSQLRequest) (*v1.ExecRawSQLResponse, error) {
+	return r.wrapped.ExecRawSQL(ctx, req)
 }
