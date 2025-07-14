@@ -27,6 +27,10 @@ func NewCachingDatalayerRepo(wrapped *DatalayerRepo, cache *RedisClient, logger 
 	}
 }
 
+func (r *CachingDatalayerRepo) ListTables(ctx context.Context, req *v1.ListTablesRequest) (*v1.ListTablesResponse, error) {
+	return r.wrapped.ListTables(ctx, req)
+}
+
 func (r *CachingDatalayerRepo) DescribeTable(ctx context.Context, req *v1.DescribeTableRequest) (*v1.DescribeTableResponse, error) {
 	return r.wrapped.DescribeTable(ctx, req)
 }
