@@ -28,6 +28,52 @@ func NewCachingDatalayerRepo(wrapped *DatalayerRepo, cache *RedisClient, logger 
 	}
 }
 
+func (r *CachingDatalayerRepo) isCacheableCondition(wc *v1.WhereClause, cacheByField string) (bool, any) {
+	if wc == nil {
+		return false, nil
+	}
+
+	condClause, ok := wc.ClauseType.(*v1.WhereClause_Condition)
+	if !ok {
+		return false, nil
+	}
+
+	cond := condClause.Condition
+	if cond == nil {
+		return false, nil
+	}
+
+	if cond.Field != cacheByField {
+		return false, nil
+	}
+
+	if cond.Operator != v1.Operator_EQ {
+		return false, nil
+	}
+
+	literalValueProvider, ok := cond.OperandType.(*v1.Condition_LiteralValue)
+	if !ok {
+		// 不符合简单缓存条件 "field = <literal_value>"
+		return false, nil
+	}
+	protoVal := literalValueProvider.LiteralValue
+
+	value, err := protobufValueToAny(protoVal)
+	if err != nil {
+		return false, nil
+	}
+
+	if value == nil {
+		return false, nil
+	}
+	switch value.(type) {
+	case []any, map[string]any:
+		return false, nil
+	}
+
+	return true, value
+}
+
 func (r *CachingDatalayerRepo) BeginTransaction(ctx context.Context, req *v1.BeginTransactionRequest) (*v1.BeginTransactionResponse, error) {
 	return r.wrapped.BeginTransaction(ctx, req)
 }
