@@ -4,6 +4,7 @@ import (
 	"context"
 	v1 "datahub/api/datalayer/v1"
 	"datahub/internal/biz"
+	"fmt"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"time"
 
@@ -72,6 +73,10 @@ func (r *CachingDatalayerRepo) isCacheableCondition(wc *v1.WhereClause, cacheByF
 	}
 
 	return true, value
+}
+
+func (r *CachingDatalayerRepo) buildCacheKey(table *v1.TableSchema, field string, value any) string {
+	return fmt.Sprintf("%s:%s:%s:%v", table.DbName, table.TableName, field, value)
 }
 
 func (r *CachingDatalayerRepo) BeginTransaction(ctx context.Context, req *v1.BeginTransactionRequest) (*v1.BeginTransactionResponse, error) {
