@@ -79,6 +79,13 @@ func (r *CachingDatalayerRepo) buildCacheKey(table *v1.TableSchema, field string
 	return fmt.Sprintf("%s:%s:%s:%v", table.DbName, table.TableName, field, value)
 }
 
+func (r *CachingDatalayerRepo) getCacheTTL(req *v1.QueryRequest) time.Duration {
+	if req.CacheTtlSeconds > 0 {
+		return time.Duration(req.CacheTtlSeconds) * time.Second
+	}
+	return defaultCacheTTL
+}
+
 func (r *CachingDatalayerRepo) BeginTransaction(ctx context.Context, req *v1.BeginTransactionRequest) (*v1.BeginTransactionResponse, error) {
 	return r.wrapped.BeginTransaction(ctx, req)
 }
