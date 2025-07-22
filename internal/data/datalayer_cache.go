@@ -4,6 +4,8 @@ import (
 	"context"
 	v1 "datahub/api/datalayer/v1"
 	"datahub/internal/biz"
+	"datahub/pkg/global"
+	"datahub/pkg/md"
 	"fmt"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"time"
@@ -27,6 +29,25 @@ func NewCachingDatalayerRepo(wrapped *DatalayerRepo, cache *RedisClient, logger 
 		cache:   cache,
 		log:     log.NewHelper(logger),
 	}
+}
+
+func (r *CachingDatalayerRepo) Delete(ctx context.Context, req *v1.DeleteRequest) (*v1.MutationResponse, error) {
+	traceId := md.GetMetadata(ctx, global.RequestIdMd)
+
+	resp, err := r.wrapped.Delete(ctx, req)
+	if err == nil && resp.AffectedRows > 0 && req.CacheByField != "" && req.RedisDb > 0 {
+		cacheable, value := r.isCacheableCondition(req.WhereClause, req.CacheByField)
+		if cacheable {
+			redisClient := r.cache.GetRedis(int32(req.RedisDb))
+			if redisClient != nil {
+				cacheKey := r.buildCacheKey(req.Table, req.CacheByField, value)
+				redisClient.Del(cacheKey)
+			} else {
+				r.log.Warnf("traceId: %s failed to get redis client for db %s, skip delete cache. req: %+v", traceId, v1.RedisDB_name[int32(req.RedisDb)], req)
+			}
+		}
+	}
+	return resp, err
 }
 
 func (r *CachingDatalayerRepo) isCacheableCondition(wc *v1.WhereClause, cacheByField string) (bool, any) {
