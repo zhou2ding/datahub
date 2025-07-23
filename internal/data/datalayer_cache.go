@@ -31,6 +31,10 @@ func NewCachingDatalayerRepo(wrapped *DatalayerRepo, cache *RedisClient, logger 
 	}
 }
 
+func (r *CachingDatalayerRepo) Insert(ctx context.Context, req *v1.InsertRequest) (*v1.MutationResponse, error) {
+	return r.wrapped.Insert(ctx, req)
+}
+
 func (r *CachingDatalayerRepo) Delete(ctx context.Context, req *v1.DeleteRequest) (*v1.MutationResponse, error) {
 	traceId := md.GetMetadata(ctx, global.RequestIdMd)
 
