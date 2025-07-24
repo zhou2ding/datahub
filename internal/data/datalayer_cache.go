@@ -35,6 +35,25 @@ func (r *CachingDatalayerRepo) Insert(ctx context.Context, req *v1.InsertRequest
 	return r.wrapped.Insert(ctx, req)
 }
 
+func (r *CachingDatalayerRepo) Update(ctx context.Context, req *v1.UpdateRequest) (*v1.MutationResponse, error) {
+	traceId := md.GetMetadata(ctx, global.RequestIdMd)
+
+	resp, err := r.wrapped.Update(ctx, req)
+	if err == nil && resp.AffectedRows > 0 && req.CacheByField != "" && req.RedisDb > 0 {
+		cacheable, value := r.isCacheableCondition(req.WhereClause, req.CacheByField)
+		if cacheable {
+			redisClient := r.cache.GetRedis(int32(req.RedisDb))
+			if redisClient != nil {
+				cacheKey := r.buildCacheKey(req.Table, req.CacheByField, value)
+				redisClient.Del(cacheKey)
+			} else {
+				r.log.Warnf("traceId: %s failed to get redis client for db %s, skip delete cache. req: %+v", traceId, v1.RedisDB_name[int32(req.RedisDb)], req)
+			}
+		}
+	}
+	return resp, err
+}
+
 func (r *CachingDatalayerRepo) Delete(ctx context.Context, req *v1.DeleteRequest) (*v1.MutationResponse, error) {
 	traceId := md.GetMetadata(ctx, global.RequestIdMd)
 
