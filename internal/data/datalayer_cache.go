@@ -6,7 +6,10 @@ import (
 	"datahub/internal/biz"
 	"datahub/pkg/global"
 	"datahub/pkg/md"
+	"errors"
 	"fmt"
+	"github.com/go-redis/redis"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"time"
 
@@ -29,6 +32,73 @@ func NewCachingDatalayerRepo(wrapped *DatalayerRepo, cache *RedisClient, logger 
 		cache:   cache,
 		log:     log.NewHelper(logger),
 	}
+}
+
+func (r *CachingDatalayerRepo) Query(ctx context.Context, req *v1.QueryRequest) (*v1.QueryResponse, error) {
+	// 不指定缓存字段或redis db，直接查数据库；select字段不为空时，直接查数据库，避免构建的缓存信息不齐全
+	if req.CacheByField == "" || req.RedisDb <= 0 || len(req.SelectFields) > 0 {
+		return r.wrapped.Query(ctx, req)
+	}
+
+	traceId := md.GetMetadata(ctx, global.RequestIdMd)
+	// 验证 where 子句是否符合简单缓存模式： “field = value”
+	cacheable, value := r.isCacheableCondition(req.WhereClause, req.CacheByField)
+	if !cacheable {
+		r.log.Warnf("traceId: %s query condition does not match simple cache pattern for field %s, skip cache. req: %+v", traceId, req.CacheByField, req)
+		// 条件不匹配，查数据库
+		return r.wrapped.Query(ctx, req)
+	}
+
+	if value == nil {
+		r.log.Warnf("traceId: %s query value is nil for field %s, skip cache. req: %+v", traceId, req.CacheByField, req)
+		return r.wrapped.Query(ctx, req)
+	}
+
+	redisClient := r.cache.GetRedis(int32(req.RedisDb))
+	if redisClient == nil {
+		r.log.Warnf("traceId: %s failed to get redis client for db %s, skip cache. req: %+v", traceId, v1.RedisDB_name[int32(req.RedisDb)], req)
+		return r.wrapped.Query(ctx, req)
+	}
+
+	cacheKey := r.buildCacheKey(req.Table, req.CacheByField, value)
+
+	// --- 1. 先查缓存 ---
+	cachedBytes, cacheErr := redisClient.Get(cacheKey).Bytes()
+	if cacheErr == nil {
+		// 缓存命中
+		var response v1.QueryResponse
+		unmarshalErr := proto.Unmarshal(cachedBytes, &response)
+		if unmarshalErr != nil {
+			// 反序列化失败，不报错，继续查数据库
+			r.log.Errorf("traceId: %s failed to unmarshal cached data for key %s: %v", traceId, cacheKey, unmarshalErr)
+		} else {
+			// 反序列化成功，给缓存续期
+			redisClient.Expire(cacheKey, r.getCacheTTL(req))
+			return &response, nil
+		}
+	} else if !errors.Is(cacheErr, redis.Nil) {
+		r.log.Errorf("traceId: %s error fetching from redis cache for key %s: %v. falling back to database.", traceId, cacheKey, cacheErr)
+	}
+
+	// --- 2. 缓存未命中，查数据 ---
+	dbResp, dbErr := r.wrapped.Query(ctx, req)
+	if dbErr != nil {
+		return dbResp, dbErr
+	}
+
+	// --- 3. 数据库命中，写回缓存 ---
+	dataToCache, marshalErr := proto.Marshal(dbResp)
+	if marshalErr != nil {
+		r.log.Errorf("traceId: %s failed to marshal db response for caching, key %s: %v. Returning DB response without caching.", traceId, cacheKey, marshalErr)
+		return dbResp, nil
+	}
+
+	setCmd := redisClient.Set(cacheKey, dataToCache, r.getCacheTTL(req))
+	if setCmd.Err() != nil {
+		r.log.Errorf("traceId: %s failed to set cache for key %s: %v. Returning DB response.", traceId, cacheKey, setCmd.Err())
+	}
+
+	return dbResp, nil
 }
 
 func (r *CachingDatalayerRepo) Insert(ctx context.Context, req *v1.InsertRequest) (*v1.MutationResponse, error) {
