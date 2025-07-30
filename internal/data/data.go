@@ -9,15 +9,20 @@ import (
 	"github.com/google/wire"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	gormLogger "gorm.io/gorm/logger"
+	"io"
 	"sync"
 	"time"
+
+	gormLogger "gorm.io/gorm/logger"
+	stdLog "log"
 )
 
 var ProviderSet = wire.NewSet(
 	NewData,
 	NewDatabase,
 	NewRedisClients,
+	NewDatalayerRepo,
+	NewCachingDatalayerRepo,
 )
 
 type Data struct {
@@ -36,7 +41,7 @@ type ormLogger struct {
 }
 
 func (o *ormLogger) Printf(format string, args ...interface{}) {
-	o.Infof(format, args...)
+	o.Debugf(format, args...)
 }
 
 func NewData(c *conf.Data, logger log.Logger, dbs map[string]*gorm.DB, cache *RedisClient) (*Data, func(), error) {
@@ -78,7 +83,7 @@ func NewDatabase(c *conf.Data, l *conf.Log, logger log.Logger) (map[string]*gorm
 			log.NewHelper(logger).Errorf("connect to dib error: %v", err)
 			return nil, err
 		}
-		if l.Stdout {
+		if l.Level == "debug" {
 			db.Logger = gormLogger.New(&ormLogger{log.NewHelper(logger)}, gormLogger.Config{
 				SlowThreshold:             time.Second,
 				LogLevel:                  gormLogger.Info,
@@ -92,7 +97,10 @@ func NewDatabase(c *conf.Data, l *conf.Log, logger log.Logger) (map[string]*gorm
 	return dbs, nil
 }
 
-func NewRedisClients(c *conf.Data, logger log.Logger) (*RedisClient, error) {
+func NewRedisClients(c *conf.Data, l *conf.Log, logger log.Logger) (*RedisClient, error) {
+	if l.Level != "debug" {
+		redis.SetLogger(stdLog.New(io.Discard, "", 0))
+	}
 	rdb := &RedisClient{
 		clients: make(map[int32]*redis.Client),
 	}
