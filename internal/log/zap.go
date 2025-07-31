@@ -3,35 +3,26 @@ package log
 import (
 	"github.com/go-kratos/kratos/v2/log"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
-var _ log.Logger = (*ZapLogger)(nil)
+var _ log.Logger = (*zapLogger)(nil)
 
-type ZapLogger struct {
+type zapLogger struct {
 	*zap.Logger
-	Sync func() error
+	fields []zap.Field
+	Sync   func() error
 }
 
-func NewZapLogger(encoder zapcore.Encoder, ws zapcore.WriteSyncer, level zapcore.Level) *ZapLogger {
-	if ws == nil {
-		panic("the writer sync can't be nil")
+func newZapLogger(logger *zap.Logger) *zapLogger {
+	return &zapLogger{
+		Logger: logger,
+		Sync:   logger.Sync,
 	}
-
-	core := zapcore.NewCore(encoder, ws, level)
-	zapLogger := zap.New(
-		core,
-		zap.AddCaller(),
-		zap.AddCallerSkip(2),
-		zap.AddStacktrace(zapcore.DPanicLevel),
-	)
-
-	return &ZapLogger{Logger: zapLogger, Sync: zapLogger.Sync}
 }
 
-func (l *ZapLogger) Log(level log.Level, keyvals ...interface{}) error {
+func (z *zapLogger) Log(level log.Level, keyvals ...interface{}) error {
 	if len(keyvals) == 0 || len(keyvals)%2 != 0 {
-		l.Warn("Keyvalues must appear in pairs")
+		z.Warn("Keyvalues must appear in pairs")
 		return nil
 	}
 
@@ -42,19 +33,20 @@ func (l *ZapLogger) Log(level log.Level, keyvals ...interface{}) error {
 
 	switch level {
 	case log.LevelDebug:
-		l.Debug("", data...)
+		z.Debug("", data...)
 	case log.LevelInfo:
-		l.Info("", data...)
+		z.Info("", data...)
 	case log.LevelWarn:
-		l.Warn("", data...)
+		z.Warn("", data...)
 	case log.LevelError:
-		l.Error("", data...)
+		z.Error("", data...)
 	case log.LevelFatal:
-		l.Fatal("", data...)
+		z.Fatal("", data...)
+	default:
+		z.Info("", data...)
 	}
 	return nil
 }
-
-func (l *ZapLogger) Close() error {
-	return l.Sync()
+func (z *zapLogger) Close() error {
+	return z.Sync()
 }

@@ -2,6 +2,7 @@ package log
 
 import (
 	"github.com/go-kratos/kratos/v2/log"
+	"go.elastic.co/ecszap"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -19,30 +20,46 @@ type Config struct {
 }
 
 func NewLogger(conf *Config) log.Logger {
-	// 设置日志级别
-	level := getZapLevel(conf.Level)
+	logger := initLogger(conf, 2)
+	return newZapLogger(logger)
+}
 
-	// 初始化 lumberjack
-	hook := lumberjack.Logger{
-		Filename:   conf.Filename,   // 日志文件路径
-		MaxSize:    conf.MaxSize,    // 每个日志文件保存的最大尺寸 单位：M
-		MaxBackups: conf.MaxBackups, // 日志文件最多保存多少个备份
-		MaxAge:     conf.MaxAge,     // 文件最多保存多少天
-		Compress:   conf.Compress,   // 是否压缩
-	}
-
-	// 设置日志输出
+func initLogger(conf *Config, skip int) *zap.Logger {
+	// 1. 设置日志输出
 	var ws zapcore.WriteSyncer
 	if conf.Stdout {
-		ws = zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout), zapcore.AddSync(&hook))
+		ws = zapcore.AddSync(os.Stdout)
 	} else {
-		ws = zapcore.AddSync(&hook)
+		// 初始化 lumberjack
+		hook := lumberjack.Logger{
+			Filename:   conf.Filename,
+			MaxSize:    conf.MaxSize,
+			MaxBackups: conf.MaxBackups,
+			MaxAge:     conf.MaxAge,
+			Compress:   conf.Compress,
+		}
+		ws = zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout), zapcore.AddSync(&hook))
 	}
 
-	// 设置日志编码
-	encoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
+	// 2. 创建 ecszap 的 EncoderConfig
+	encoderConfig := ecszap.NewDefaultEncoderConfig()
 
-	return NewZapLogger(encoder, ws, level)
+	// 3. 创建 ecszap Core
+	core := ecszap.NewCore(
+		encoderConfig,
+		ws,
+		getZapLevel(conf.Level),
+	)
+
+	// 4. 创建 zap logger
+	logger := zap.New(
+		core,
+		zap.AddCaller(),
+		zap.AddCallerSkip(skip),
+		zap.AddStacktrace(zapcore.DPanicLevel), // DPanicLevel 及以上级别日志会自动带上堆栈信息
+	)
+
+	return logger
 }
 
 func getZapLevel(level string) zapcore.Level {
