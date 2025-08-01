@@ -21,18 +21,20 @@ const (
 )
 
 type CachingDatalayerRepo struct {
-	wrapped biz.DatalayerRepo
+	wrapped *DatalayerRepo
 	cache   *RedisClient
 	log     *log.Helper
 }
 
-func NewCachingDatalayerRepo(wrapped *DatalayerRepo, cache *RedisClient, logger log.Logger) *CachingDatalayerRepo {
+func NewCachingDatalayerRepo(wrapped *DatalayerRepo, cache *RedisClient, logger log.Logger) biz.DatalayerRepo {
 	return &CachingDatalayerRepo{
 		wrapped: wrapped,
 		cache:   cache,
 		log:     log.NewHelper(logger),
 	}
 }
+
+var _ biz.DatalayerRepo = (*CachingDatalayerRepo)(nil)
 
 func (r *CachingDatalayerRepo) Query(ctx context.Context, req *v1.QueryRequest) (*v1.QueryResponse, error) {
 	// 不指定缓存字段或redis db，直接查数据库；select字段不为空时，直接查数据库，避免构建的缓存信息不齐全
@@ -101,48 +103,6 @@ func (r *CachingDatalayerRepo) Query(ctx context.Context, req *v1.QueryRequest) 
 	return dbResp, nil
 }
 
-func (r *CachingDatalayerRepo) Insert(ctx context.Context, req *v1.InsertRequest) (*v1.MutationResponse, error) {
-	return r.wrapped.Insert(ctx, req)
-}
-
-func (r *CachingDatalayerRepo) Update(ctx context.Context, req *v1.UpdateRequest) (*v1.MutationResponse, error) {
-	traceId := md.GetMetadata(ctx, global.RequestIdMd)
-
-	resp, err := r.wrapped.Update(ctx, req)
-	if err == nil && resp.AffectedRows > 0 && req.CacheByField != "" && req.RedisDb > 0 {
-		cacheable, value := r.isCacheableCondition(req.WhereClause, req.CacheByField)
-		if cacheable {
-			redisClient := r.cache.GetRedis(int32(req.RedisDb))
-			if redisClient != nil {
-				cacheKey := r.buildCacheKey(req.Table, req.CacheByField, value)
-				redisClient.Del(cacheKey)
-			} else {
-				r.log.Warnf("traceId: %s failed to get redis client for db %s, skip delete cache. req: %+v", traceId, v1.RedisDB_name[int32(req.RedisDb)], req)
-			}
-		}
-	}
-	return resp, err
-}
-
-func (r *CachingDatalayerRepo) Delete(ctx context.Context, req *v1.DeleteRequest) (*v1.MutationResponse, error) {
-	traceId := md.GetMetadata(ctx, global.RequestIdMd)
-
-	resp, err := r.wrapped.Delete(ctx, req)
-	if err == nil && resp.AffectedRows > 0 && req.CacheByField != "" && req.RedisDb > 0 {
-		cacheable, value := r.isCacheableCondition(req.WhereClause, req.CacheByField)
-		if cacheable {
-			redisClient := r.cache.GetRedis(int32(req.RedisDb))
-			if redisClient != nil {
-				cacheKey := r.buildCacheKey(req.Table, req.CacheByField, value)
-				redisClient.Del(cacheKey)
-			} else {
-				r.log.Warnf("traceId: %s failed to get redis client for db %s, skip delete cache. req: %+v", traceId, v1.RedisDB_name[int32(req.RedisDb)], req)
-			}
-		}
-	}
-	return resp, err
-}
-
 func (r *CachingDatalayerRepo) isCacheableCondition(wc *v1.WhereClause, cacheByField string) (bool, any) {
 	if wc == nil {
 		return false, nil
@@ -198,6 +158,48 @@ func (r *CachingDatalayerRepo) getCacheTTL(req *v1.QueryRequest) time.Duration {
 		return time.Duration(req.CacheTtlSeconds) * time.Second
 	}
 	return defaultCacheTTL
+}
+
+func (r *CachingDatalayerRepo) Insert(ctx context.Context, req *v1.InsertRequest) (*v1.MutationResponse, error) {
+	return r.wrapped.Insert(ctx, req)
+}
+
+func (r *CachingDatalayerRepo) Update(ctx context.Context, req *v1.UpdateRequest) (*v1.MutationResponse, error) {
+	traceId := md.GetMetadata(ctx, global.RequestIdMd)
+
+	resp, err := r.wrapped.Update(ctx, req)
+	if err == nil && resp.AffectedRows > 0 && req.CacheByField != "" && req.RedisDb > 0 {
+		cacheable, value := r.isCacheableCondition(req.WhereClause, req.CacheByField)
+		if cacheable {
+			redisClient := r.cache.GetRedis(int32(req.RedisDb))
+			if redisClient != nil {
+				cacheKey := r.buildCacheKey(req.Table, req.CacheByField, value)
+				redisClient.Del(cacheKey)
+			} else {
+				r.log.Warnf("traceId: %s failed to get redis client for db %s, skip delete cache. req: %+v", traceId, v1.RedisDB_name[int32(req.RedisDb)], req)
+			}
+		}
+	}
+	return resp, err
+}
+
+func (r *CachingDatalayerRepo) Delete(ctx context.Context, req *v1.DeleteRequest) (*v1.MutationResponse, error) {
+	traceId := md.GetMetadata(ctx, global.RequestIdMd)
+
+	resp, err := r.wrapped.Delete(ctx, req)
+	if err == nil && resp.AffectedRows > 0 && req.CacheByField != "" && req.RedisDb > 0 {
+		cacheable, value := r.isCacheableCondition(req.WhereClause, req.CacheByField)
+		if cacheable {
+			redisClient := r.cache.GetRedis(int32(req.RedisDb))
+			if redisClient != nil {
+				cacheKey := r.buildCacheKey(req.Table, req.CacheByField, value)
+				redisClient.Del(cacheKey)
+			} else {
+				r.log.Warnf("traceId: %s failed to get redis client for db %s, skip delete cache. req: %+v", traceId, v1.RedisDB_name[int32(req.RedisDb)], req)
+			}
+		}
+	}
+	return resp, err
 }
 
 func (r *CachingDatalayerRepo) BeginTransaction(ctx context.Context, req *v1.BeginTransactionRequest) (*v1.BeginTransactionResponse, error) {

@@ -23,17 +23,25 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
-	dataData, cleanup, err := data.NewData(confData, logger)
+func wireApp(confServer *conf.Server, confData *conf.Data, confLog *conf.Log, logger log.Logger) (*kratos.App, func(), error) {
+	v, err := data.NewDatabase(confData, confLog, logger)
 	if err != nil {
 		return nil, nil, err
 	}
-	greeterRepo := data.NewGreeterRepo(dataData, logger)
-	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
-	greeterService := service.NewGreeterService(greeterUsecase)
-	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
-	httpServer := server.NewHTTPServer(confServer, greeterService, logger)
-	app := newApp(logger, grpcServer, httpServer)
+	redisClient, err := data.NewRedisClients(confData, confLog, logger)
+	if err != nil {
+		return nil, nil, err
+	}
+	dataData, cleanup, err := data.NewData(confData, logger, v, redisClient)
+	if err != nil {
+		return nil, nil, err
+	}
+	datalayerRepo := data.NewDatalayerRepo(dataData, logger)
+	bizDatalayerRepo := data.NewCachingDatalayerRepo(datalayerRepo, redisClient, logger)
+	datalayerUseCase := biz.NewDatalayerUseCase(bizDatalayerRepo, logger)
+	datalayerService := service.NewDatalayerService(datalayerUseCase)
+	grpcServer := server.NewGRPCServer(confServer, datalayerService, logger)
+	app := newApp(logger, grpcServer)
 	return app, func() {
 		cleanup()
 	}, nil
