@@ -6,20 +6,17 @@ log:
   limit: 15
   stdout: true
 server:
-  http:
-    addr: 0.0.0.0:8000
-    timeout: 1s
   grpc:
-    addr: 0.0.0.0:9000
-    timeout: 1s
+    addr: 0.0.0.0:10115
+    timeout: 15s
 data:
-  database:
-    - name: mysql
-      source: root:root@tcp(127.0.0.1:3306)/test?parseTime=True&loc=Local
+  databases:
+    - name: datahub
+      dsn: yourUsername:yourPassword@tcp(mysql.mysql.svc.cluster.local:4000)/datahub?parseTime=True&loc=Local
   redis:
-    master: "aoni-master"
-    password: "eptest$00"
+    master: "redis-master"
+    password: "yourPassword"
     sentinelAddrs:
-      - "aoni-redis:26379"
-      - "aoni-redis:26479"
-      - "aoni-redis:26579"
+      - "sentinel0.redis.svc.cluster.local:5000"
+      - "sentinel1.redis.svc.cluster.local:5000"
+      - "sentinel2.redis.svc.cluster.local:5000"

@@ -1,24 +1,21 @@
-FROM golang:1.19 AS builder
+FROM golang:1.24.1-alpine AS builder
 
-COPY datahub /src
-WORKDIR /src
+RUN apk add --no-cache make
+
+COPY . /src
+
+WORKDIR /src/apps/datahub
 
 RUN GOPROXY=https://goproxy.cn make build
 
-FROM debian:stable-slim
+FROM alpine:latest
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-		ca-certificates  \
-        netbase \
-        && rm -rf /var/lib/apt/lists/ \
-        && apt-get autoremove -y && apt-get autoclean -y
-
-COPY --from=builder /src/bin /app
+COPY --from=builder /src/apps/datahub/bin /app
 
 WORKDIR /app
 
-EXPOSE 8000
-EXPOSE 9000
-VOLUME /data/conf
+EXPOSE 10115
 
-CMD ["./server", "-conf", "/data/conf"]
+VOLUME ["/data/conf", "/data/logs"]
+
+CMD ["./datahub", "-c", "/data/conf"]

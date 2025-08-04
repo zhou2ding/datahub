@@ -44,10 +44,16 @@ api:
 	       --openapi_out=fq_schema_naming=true,default_response=false:. \
 	       $(API_PROTO_FILES)
 
+# 获取当前时间，格式 yymmdd.hh.mm.ss
+BUILD_DATE := $(shell date +"%y%m%d.%H.%M.%S")
+
+# 如果 git 不可用，使用默认值
+VERSION := $(shell git describe --tags --always 2>/dev/null || echo "dev")
+
 .PHONY: build
 # build
 build:
-	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
+	mkdir -p bin/ && go build -ldflags "-s -w -X main.Name=datahub -X main.Version=$(VERSION) -X main.BuildDate=$(BUILD_DATE)" -o ./bin/datahub ./cmd/datahub/...
 
 .PHONY: generate
 # generate
