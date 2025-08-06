@@ -28,3 +28,7 @@ func simpleSnakeToCamel(s string) string {
 	}
 	return result.String()
 }
+
+func tableNameToStructName(tableName string) string {
+	return simpleSnakeToCamel(tableName) + "Table"
+}
