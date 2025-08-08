@@ -32,3 +32,7 @@ func simpleSnakeToCamel(s string) string {
 func tableNameToStructName(tableName string) string {
 	return simpleSnakeToCamel(tableName) + "Table"
 }
+
+func tableNameToVarName(tableName string) string {
+	return simpleSnakeToCamel(tableName)
+}
