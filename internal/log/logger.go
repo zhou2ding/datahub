@@ -1,12 +1,13 @@
 package log
 
 import (
+	"os"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"go.elastic.co/ecszap"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"os"
 )
 
 type Config struct {

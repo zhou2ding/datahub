@@ -4,15 +4,16 @@ import (
 	zap "datahub/internal/log"
 	"flag"
 	"fmt"
+	"os"
+	"os/signal"
+	"strings"
+	"syscall"
+
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"os"
-	"os/signal"
-	"strings"
-	"syscall"
 
 	"datahub/internal/conf"
 

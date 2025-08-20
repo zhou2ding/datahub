@@ -3,18 +3,20 @@ package data
 import (
 	"datahub/api/datalayer/v1"
 	"datahub/internal/conf"
+	"io"
+	"sync"
+	"time"
+
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-redis/redis"
 	"github.com/google/uuid"
 	"github.com/google/wire"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"io"
-	"sync"
-	"time"
+
+	stdLog "log"
 
 	gormLogger "gorm.io/gorm/logger"
-	stdLog "log"
 )
 
 var ProviderSet = wire.NewSet(
